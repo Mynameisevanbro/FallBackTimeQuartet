@@ -1,0 +1,13 @@
+*{
+	font-family: sans-serif;
+}
+
+#canvas {
+	border: 1px black solid;
+}
+
+#console {
+	background-color: black;
+	color: lime;
+	font-family: Courier;
+}
