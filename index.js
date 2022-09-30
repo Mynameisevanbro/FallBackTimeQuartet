@@ -586,6 +586,9 @@ function run() {
 
 // start up
 function reset() {
+	// test
+	var audio = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.wav")
+	audio.loop = audio.play()
 	// adjust canvas to 4:3 scale
 	const canvas = document.getElementById("canvas");
 	const console = document.getElementById("console");
@@ -602,10 +605,10 @@ function reset() {
 	s["s"] = canvas_width / 250;
 	// load image
 	let soul_red = new Image();
-	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet/main/soul_red.png";
+	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_red.png";
 	sprite["soul_red"] = soul_red;
 	let soul_blue = new Image();
-	soul_blue.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet/main/soul_blue.png";
+	soul_blue.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_blue.png";
 	sprite["soul_blue"] = soul_blue;
 	// run main loop
 	if (s["run"] == false) {
