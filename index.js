@@ -511,10 +511,14 @@ function run() {
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
 	// draw options
-	canvas_img(texture["fight0"], [texture["opt_xo"], texture["opt_y"],  texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["act0"], [texture["opt_xm"] + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["item0"], [texture["opt_xm"] * 2 + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["fight0"], [texture["opt_xm"] * 3 + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["fight0"],
+		[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["act0"],
+		[texture["opt_xm"] + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["item0"], 
+		[texture["opt_xm"] * 2 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["fight0"],
+		[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
 	// draw soul
 	if (s["m"] == "red") {
 		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
