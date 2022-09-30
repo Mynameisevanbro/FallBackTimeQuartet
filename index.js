@@ -39,6 +39,7 @@ var s = {
 var box = {
 	"preset": "square",
 	"hidden": true,
+	"bottom": 0,
 	"x": 0,
 	"y": 0,
 	"w": 0,
@@ -47,12 +48,22 @@ var box = {
 	"hlw": 0,  // half line width
 }
 var texture = {
+	// soul textures
 	"soul_red": null,
 	"soul_blue": null,
+	// options data
+	"opt_xm": 0,  // x multiplier
+	"opt_y": 0,
+	"opt_w": 0,
+	"opt_xo": 0,  // x offset
+	"opt_h": 0,
+	// option textures
 	"fight0": null,
 	"act0": null,
 	"item0": null,
 }
+
+
 var audio = {
 	"impact": null,
 }
@@ -208,7 +219,6 @@ function manage_box() {
 		canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + box["h"] + s["y_shake"], box["w"], box["line_w"]], "white");
 	}
 	// update dimensions
-	let bottom = canvas_height / 1.2
 	let w_tar = 0
 	let h_tar = 0
 	let x_tar = 0
@@ -218,13 +228,13 @@ function manage_box() {
 		w_tar = canvas_width / 3.5
 		h_tar = w_tar
 		x_tar = (canvas_width / 2) - (w_tar / 2)
-		y_tar = bottom - h_tar
+		y_tar = box["bottom"] - h_tar
 	} else if (box["preset"] == "rectangle") {
 		// calculate target values
 		w_tar = canvas_width / 1.5
 		h_tar = (canvas_width / 3.5) / 1.2
 		x_tar = (canvas_width / 2) - (w_tar / 2)
-		y_tar = bottom - h_tar
+		y_tar = box["bottom"] - h_tar
 	}
 	// apply dimensions
 	let x_diff = Math.abs(box["x"] - x_tar) / 4
@@ -267,39 +277,7 @@ function manage_box() {
 }
 
 
-// main loop
-function run() {
-	canvas_rect([0, 0, canvas_width, canvas_height], "black");
-	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
-	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
-	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
-	// buttons
-	let box_bottom = canvas_height / 1.2
-	canvas_img(texture["fight0"], [s["x"] + s["x_shake"], box_bottom + s["y_shake"], s["w"], 113], 33)
-	// draw soul
-	if (s["m"] == "red") {
-		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
-	} else if (s["m"] == "blue") {
-		canvas_img(texture["soul_blue"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
-		
-	}
-	// screen shake
-	if (s["x_shake"] > 0) {
-		s["x_shake"] -= Math.random() * (Math.abs(s["x_shake"] * 3))
-	} else if (s["x_shake"] < 0) {
-		s["x_shake"] += Math.random() * (Math.abs(s["x_shake"] * 3))
-	}
-	if (s["y_shake"] > 0) {
-		s["y_shake"] -= Math.random() * (Math.abs(s["y_shake"] * 3))
-	} else if (s["y_shake"] < 0) {
-		s["y_shake"] += Math.random() * (Math.abs(s["y_shake"] * 3))
-	}
-	if (Math.abs(s["x_shake"] < 2)) {
-		s["x_shake"] == 0
-	}
-	if (Math.abs(s["y_shake"] < 2)) {
-		s["y_shake"] == 0
-	}
+function manage_command() {
 	// output console commands
 	let con = document.getElementById("console")
 	con.innerHTML = ""
@@ -317,7 +295,7 @@ function run() {
 			con.innerHTML += `soul.${command[i]["mode"]}.${command[i]["gravity"]}\n`
 		}
 	}
-	// commands
+	// run through & execute commands
 	for (let i = 0; i < command.length; i ++) {
 		try {
 			// execute
@@ -378,7 +356,10 @@ function run() {
 
 		}
 	}
-	// movement
+}
+
+
+function manage_movement() {
 	if (s["m"] == "red") {
 		// angle
 		let diff = Math.abs(s["a"])
@@ -520,7 +501,48 @@ function run() {
 			}
 		}
 	}
-	
+}
+
+
+// main loop
+function run() {
+	canvas_rect([0, 0, canvas_width, canvas_height], "black");
+	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
+	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
+	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
+	// draw options
+	canvas_img(texture["fight0"], [texture["opt_xo"], texture["opt_y"],  texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["act0"], [texture["opt_xm"] + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["item0"], [texture["opt_xm"] * 2 + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
+	canvas_img(texture["fight0"], [texture["opt_xm"] * 3 + texture["opt_xo"], texture["opt_y"], texture["opt_w"], texture["opt_h"]])
+	// draw soul
+	if (s["m"] == "red") {
+		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
+	} else if (s["m"] == "blue") {
+		canvas_img(texture["soul_blue"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
+		
+	}
+	// screen shake
+	if (s["x_shake"] > 0) {
+		s["x_shake"] -= Math.random() * (Math.abs(s["x_shake"] * 3))
+	} else if (s["x_shake"] < 0) {
+		s["x_shake"] += Math.random() * (Math.abs(s["x_shake"] * 3))
+	}
+	if (s["y_shake"] > 0) {
+		s["y_shake"] -= Math.random() * (Math.abs(s["y_shake"] * 3))
+	} else if (s["y_shake"] < 0) {
+		s["y_shake"] += Math.random() * (Math.abs(s["y_shake"] * 3))
+	}
+	if (Math.abs(s["x_shake"] < 2)) {
+		s["x_shake"] == 0
+	}
+	if (Math.abs(s["y_shake"] < 2)) {
+		s["y_shake"] == 0
+	}
+	// commands
+	manage_command()
+	// movement
+	manage_movement()
 	// wall collision
 	if (s["x"] < box["x"] + box["hlw"]) {
 		s["x"] = box["x"] + box["hlw"]
@@ -596,11 +618,19 @@ function reset() {
 	canvas.height = canvas_height;
 	// adjust console
 	console.style.height = `${canvas_height}px`;
-	//
+	// adjust box
 	box["line_w"] = canvas_width / 125;
+	box["bottom"] = canvas_height / 1.3
+	// adjust soul
 	s["w"] = canvas_width / 35;
 	s["h"] = canvas_width / 35;
 	s["s"] = canvas_width / 250;
+	// adjust options
+	texture["opt_xm"] = canvas_width / 4
+	texture["opt_y"] = canvas_height / 1.14
+	texture["opt_w"] = canvas_width / 5
+	texture["opt_xo"] = (texture["opt_xm"] - texture["opt_w"]) / 2
+	texture["opt_h"] = (texture["opt_w"] * 40) / 113
 	// load images
 	let soul_red = new Image();
 	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_red.png";
