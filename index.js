@@ -49,6 +49,9 @@ var box = {
 var texture = {
 	"soul_red": null,
 	"soul_blue": null,
+	"fight0": null,
+	"act0": null,
+	"item0": null,
 }
 var audio = {
 	"impact": null,
@@ -116,7 +119,11 @@ var command = [
 		"gravity": "down",
 		"force": 1,
 	},
-	
+	{
+		"name": "box",
+		"preset": "rectangle",
+		"hidden": false,
+	},
 ]
 
 
@@ -266,6 +273,9 @@ function run() {
 	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
+	// buttons
+	let box_bottom = canvas_height / 1.2
+	canvas_img(texture["fight0"], [s["x"] + s["x_shake"], box_bottom + s["y_shake"], s["w"], 113], 33)
 	// draw soul
 	if (s["m"] == "red") {
 		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
@@ -598,6 +608,15 @@ function reset() {
 	let soul_blue = new Image();
 	soul_blue.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_blue.png";
 	texture["soul_blue"] = soul_blue;
+	let fight0 = new Image();
+	fight0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/fight0.png";
+	texture["fight0"] = fight0;
+	let item0 = new Image();
+	item0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/item0.png";
+	texture["item0"] = item0;
+	let act0 = new Image();
+	act0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/act0.png";
+	texture["act0"] = act0;
 	// load audio
 	let impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
 	impact.type = 'audio/mp3';
