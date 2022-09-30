@@ -46,9 +46,12 @@ var box = {
 	"line_w" : 0,
 	"hlw": 0,  // half line width
 }
-var sprite = {
+var texture = {
 	"soul_red": null,
 	"soul_blue": null,
+}
+var audio = {
+	"impact": null,
 }
 var command = [
 	{
@@ -105,28 +108,6 @@ var command = [
 		"name": "soul",
 		"mode": "blue",
 		"gravity": "right",
-		"force": 5,
-	},
-	{
-		"name": "wait",
-		"until": "time",
-		"time": 100,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "up",
-		"force": 5,
-	},
-	{
-		"name": "wait",
-		"until": "time",
-		"time": 25,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "down",
 		"force": 5,
 	},
 	{
@@ -287,9 +268,9 @@ function run() {
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
 	// draw soul
 	if (s["m"] == "red") {
-		canvas_img(sprite["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]])
+		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
 	} else if (s["m"] == "blue") {
-		canvas_img(sprite["soul_blue"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
+		canvas_img(texture["soul_blue"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
 		
 	}
 	// screen shake
@@ -389,6 +370,12 @@ function run() {
 	}
 	// movement
 	if (s["m"] == "red") {
+		// angle
+		let diff = Math.abs(s["a"])
+		if (s["a"] > 0) {
+			s["a"] -= diff / 10
+		}
+		// movement
 		if (s["left"]) {
 			s["x"] -= s["s"];
 		}
@@ -530,6 +517,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "left") {
 			if (s["force"] > 19) {
+				audio["impact"].play()
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -542,6 +530,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "right") {
 			if (s["force"] > 19) {
+				audio["impact"].play()
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -554,6 +543,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "up") {
 			if (s["force"] > 19) {
+				audio["impact"].play()
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -566,6 +556,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "down") {
 			if (s["force"] > 19) {
+				audio["impact"].play()
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -586,9 +577,6 @@ function run() {
 
 // start up
 function reset() {
-	// test
-	var audio = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.wav")
-	audio.loop = audio.play()
 	// adjust canvas to 4:3 scale
 	const canvas = document.getElementById("canvas");
 	const console = document.getElementById("console");
@@ -603,18 +591,18 @@ function reset() {
 	s["w"] = canvas_width / 35;
 	s["h"] = canvas_width / 35;
 	s["s"] = canvas_width / 250;
-	// load image
+	// load images
 	let soul_red = new Image();
 	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_red.png";
-	sprite["soul_red"] = soul_red;
+	texture["soul_red"] = soul_red;
 	let soul_blue = new Image();
 	soul_blue.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_blue.png";
-	sprite["soul_blue"] = soul_blue;
-	// run main loop
-	if (s["run"] == false) {
-		s["run"] = true;
-		run();
-	}
+	texture["soul_blue"] = soul_blue;
+	// load audio
+	let impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
+	impact.type = 'audio/mp3';
+	impact.loop = false;
+	audio["impact"] = impact
 }
 
 // event listeners
