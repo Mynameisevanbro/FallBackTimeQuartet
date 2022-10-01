@@ -5,13 +5,18 @@
 	<title id="title">Quartet Game Engine test</title>
 	<!-- JS -->
 	<script type="text/javascript" src="index.js"></script>
+	<script type="text/javascript" src="command.js"></script>
 	<!-- CSS -->
 	<link rel="stylesheet" type="text/css" href="index.css"/>
 </head>
 <body>
 	<canvas id="canvas"></canvas>
-	<textarea id="console" disabled="true">Loading</textarea>
+	<textarea id="console" disabled="true" placeholder="[Command list empty]"></textarea>
+	<textarea id="console_animation" disabled="true" placeholder="[Animation list empty]"></textarea>
 	<br>
-	<button onclick="s['run']=true;run()">Start</button>
+	<button onclick="load_command_intro()">Load [intro]</button>
+	<button onclick="load_command_test()">Load [test]</button>
+	<button onclick="load_command_lmao()">Load [lmao]</button>
+	<button onclick="load_command_animation_test()">Load [animation test]</button>
 </body>
 </html>
