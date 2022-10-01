@@ -1,4 +1,4 @@
-// varables
+// varables - dddddddddddddddd
 var canvas_width;
 var canvas_height;
 var s = {
@@ -7,6 +7,7 @@ var s = {
 	"loaded": false,
 	"x_shake": 0,
 	"y_shake": 0,
+	"animation": [],
 	// player
 	"x": 0,
 	"y": 0,
@@ -15,6 +16,9 @@ var s = {
 	"s": 0,  // speed
 	"a": 360,  // angle
 	"m": "red",  // mode
+	"hidden": false,
+	"pulse": false,
+	"pulse_m": 0,  // magnitude
 	"gravity": "down",
 	"force": 0,
 	"lock": false,  // can move?
@@ -32,13 +36,13 @@ var s = {
 	"timeframe": [],
 	"fps_set": 60,
 	"fps": 0,
-	"fps_avg_arrary": [99999999],
+	"fps_avg_arrary": [9999999],
 	"fps_avg": 0,
-	"timeout": 0,
+	"timeout": 20,
 }
 var box = {
 	"preset": "square",
-	"hidden": true,
+	"hidden": false,
 	"bottom": 0,
 	"x": 0,
 	"y": 0,
@@ -48,6 +52,7 @@ var box = {
 	"hlw": 0,  // half line width
 }
 var texture = {
+	"title": null,
 	// soul textures
 	"soul_red": null,
 	"soul_blue": null,
@@ -66,76 +71,9 @@ var texture = {
 
 var audio = {
 	"impact": null,
+	"theme0": null,
 }
-var command = [
-	{
-		"name": "wait",
-		"until": "load",
-		"time": 0,
-	},
-	{
-		"name": "box",
-		"preset": "square",
-		"hidden": false,
-	},
-	{
-		"name": "position",
-		"preset": true,  // use coordinates or present?
-		"preset_name": "center",
-		"x": 0,
-		"y": 0,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "down",
-		"force": 5,
-	},
-	{
-		"name": "wait",
-		"until": "time",
-		"time": 100,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "up",
-		"force": 5,
-	},
-	{
-		"name": "wait",
-		"until": "time",
-		"time": 100,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "left",
-		"force": 5,
-	},
-	{
-		"name": "wait",
-		"until": "time",
-		"time": 100,
-	},
-	{
-		"name": "soul",
-		"mode": "blue",
-		"gravity": "right",
-		"force": 5,
-	},
-	{
-		"name": "soul",
-		"mode": "red",
-		"gravity": "down",
-		"force": 1,
-	},
-	{
-		"name": "box",
-		"preset": "rectangle",
-		"hidden": false,
-	},
-]
+var command = []
 
 
 // system
@@ -190,13 +128,14 @@ function canvas_rect(rect, color) {
 }
 
 
-function canvas_img(image, rect, angle=0) {
+function canvas_img(image, rect, angle=0, opacity=1) {
 	// define canvas
 	const canvas = document.getElementById("canvas");
 	const ctx = canvas.getContext("2d");
 	// draw image
 	ctx.translate(rect[0] + rect[2] / 2, rect[1] + rect[3] / 2)
 	ctx.rotate(angle * Math.PI / 180)
+	ctx.globalAlpha = opacity
 	try {
 		ctx.drawImage(image, -(rect[2] / 2), -(rect[3] / 2), rect[2], rect[3]);
 	} catch {
@@ -204,6 +143,7 @@ function canvas_img(image, rect, angle=0) {
 	}
 	ctx.rotate(-angle * Math.PI / 180)
 	ctx.translate(-(rect[0] + rect[2] / 2), -(rect[1] + rect[3] / 2))
+	ctx.globalAlpha = 1
 	
 }
 
@@ -219,10 +159,10 @@ function manage_box() {
 		canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + box["h"] + s["y_shake"], box["w"], box["line_w"]], "white");
 	}
 	// update dimensions
-	let w_tar = 0
-	let h_tar = 0
-	let x_tar = 0
-	let y_tar = 0
+	let w_tar = box["w"]
+	let h_tar = box["h"]
+	let x_tar = box["x"]
+	let y_tar = box["y"]
 	if (box["preset"] == "square") {
 		// calculate target values
 		w_tar = canvas_width / 3.5
@@ -289,10 +229,16 @@ function manage_command() {
 			con.innerHTML += `position.${command[i]["preset_name"]}.${command[i]["x"]}.${command[i]["y"]}\n`
 		}
 		if (command[i]["name"] == "box") {
-			con.innerHTML += `box.${command[i]["present"]}.${command[i]["hidden"]}\n`
+			con.innerHTML += `box.${command[i]["preset"]}.${command[i]["hidden"]}\n`
 		}
 		if (command[i]["name"] == "soul") {
 			con.innerHTML += `soul.${command[i]["mode"]}.${command[i]["gravity"]}\n`
+		}
+		if (command[i]["name"] == "audio") {
+			con.innerHTML += `audio.${command[i]["file"]}\n`
+		}
+		if (command[i]["name"] == "animate") {
+			con.innerHTML += `animate.${command[i]["preset"]}\n`
 		}
 	}
 	// run through & execute commands
@@ -346,9 +292,27 @@ function manage_command() {
 				s["m"] = command[0]["mode"]
 				s["gravity"] = command[0]["gravity"]
 				s["force"] = command[0]["force"] * s["s"]
+				s["pulse"] = command[0]["pulse"]
+				s["hidden"] = command[0]["hidden"]
 				// reset gravity
 				s["up_enabled"] = false;
 				s["down_enabled"] = false;
+				// finish task
+				command.shift()
+			}
+			if (command[0]["name"] == "audio") {
+				// play audio
+				audio[command[0]["file"]].play()
+				// finish task
+				command.shift()
+			}
+			if (command[0]["name"] == "animate") {
+				// push animation
+				obj = {
+					"name": command[0]["preset"],
+					"frame": 0,
+				}
+				s["animation"].push(obj)
 				// finish task
 				command.shift()
 			}
@@ -504,6 +468,73 @@ function manage_movement() {
 }
 
 
+function manage_animation() {
+	// output console animation commands
+	let con = document.getElementById("console_animation");
+	con.innerHTML = "";
+	let percent = 0;
+	for (let i = 0; i < s["animation"].length; i ++) {
+		if (s["animation"][i]["name"] == "title") {
+			percent = Math.round((s["animation"][i]["frame"] / 2) * 100)
+			con.innerHTML += `${percent}% - title\n`
+		} else if (s["animation"][i]["name"] == "sans_intro") {
+			con.innerHTML += "sans_intro\n"
+		} else if (s["animation"][i]["name"] == "box_down") {
+			percent = Math.round(s["animation"][i]["frame"] * 100)
+			con.innerHTML += `${percent}% - box_down\n`
+		}
+	}
+	// execute animations
+	for (let i = 0; i < s["animation"].length; i ++) {
+		// title fade in/out
+		if (s["animation"][i]["name"] == "title") {
+			// animate
+			s["animation"][i]["frame"] += 0.01;
+			// define positions
+			let y = canvas_height / 2;
+			let w = canvas_width / 2;
+			let x = (canvas_width / 2) - (w / 2);
+			let h = (w * 53) / 170;
+			// fade in
+			if (s["animation"][i]["frame"] < 1) {
+				canvas_img(texture["title"], [x, y, w, h], 0, s["animation"][i]["frame"]);
+			// fade out
+			} else if (s["animation"][i]["frame"] < 2){
+				canvas_img(texture["title"], [x, y, w, h], 0, 2 - s["animation"][i]["frame"]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 2){
+				s["animation"].splice(i, 1)
+			}
+		// box down
+		} else if (s["animation"][i]["name"] == "box_down") {
+			// animate
+			s["animation"][i]["frame"] += 0.005
+			box["preset"] = "custom"
+			// calculate target values
+			let dist = box["bottom"] - (canvas_height / 2)
+			let w = s["w"]
+			let h = s["h"]
+			let x = (canvas_width / 2) - (w / 2)
+			let y = (canvas_height / 2) + (dist * s["animation"][i]["frame"])
+			// apply animation
+			box["w"] = w
+			box["h"] = h
+			box["x"] = x
+			box["y"] = y
+			// end animation
+			if (s["animation"][i]["frame"] > 1) {
+				s["animation"].splice(i, 1)
+			}
+		// sans intro
+		} else if (s["animation"][i]["name"] == "sans_intro") {
+			// animate
+			s["animation"][i]["frame"] += 0.01;
+			s["animation"].splice(i, 1)
+		}
+	}
+}
+
+
 // main loop
 function run() {
 	canvas_rect([0, 0, canvas_width, canvas_height], "black");
@@ -517,14 +548,24 @@ function run() {
 		[texture["opt_xm"] + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
 	canvas_img(texture["item0"], 
 		[texture["opt_xm"] * 2 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["fight0"],
+	canvas_img(texture["mercy0"],
 		[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+	// draw soul pulse
+	if (s["hidden"] == false) {
+		if (s["pulse"]) {
+			s["pulse_m"] += s["w"] / 20
+			if (s["pulse_m"] > s["w"] * 3.5) {
+				s["pulse_m"] = 0
+			}
+			let o = (s["pulse_m"] - s["w"]) / 2  // offset
+			let opacity = 1 - (s["pulse_m"] / (s["w"] * 3.5))
+			canvas_img(texture[`soul_${s["m"]}`],
+				[s["x"] - o + s["x_shake"], s["y"] - o + s["y_shake"], s["pulse_m"] , s["pulse_m"] ], s["a"], opacity)
+		}
+	}
 	// draw soul
-	if (s["m"] == "red") {
-		canvas_img(texture["soul_red"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
-	} else if (s["m"] == "blue") {
-		canvas_img(texture["soul_blue"], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
-		
+	if (s["hidden"] == false) {
+		canvas_img(texture[`soul_${s["m"]}`], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
 	}
 	// screen shake
 	if (s["x_shake"] > 0) {
@@ -544,9 +585,11 @@ function run() {
 		s["y_shake"] == 0
 	}
 	// commands
-	manage_command()
+	manage_command();
 	// movement
-	manage_movement()
+	manage_movement();
+	// animation
+	manage_animation();
 	// wall collision
 	if (s["x"] < box["x"] + box["hlw"]) {
 		s["x"] = box["x"] + box["hlw"]
@@ -616,12 +659,14 @@ function reset() {
 	// adjust canvas to 4:3 scale
 	const canvas = document.getElementById("canvas");
 	const console = document.getElementById("console");
+	const console_animation = document.getElementById("console_animation");
 	canvas_width = window.innerHeight;
 	canvas_height = (window.innerHeight / 4) * 3;
 	canvas.width = canvas_width;
 	canvas.height = canvas_height;
 	// adjust console
 	console.style.height = `${canvas_height}px`;
+	console_animation.style.height = `${canvas_height}px`;
 	// adjust box
 	box["line_w"] = canvas_width / 125;
 	box["bottom"] = canvas_height / 1.3
@@ -636,6 +681,9 @@ function reset() {
 	texture["opt_xo"] = (texture["opt_xm"] - texture["opt_w"]) / 2
 	texture["opt_h"] = (texture["opt_w"] * 40) / 113
 	// load images
+	let title = new Image();
+	title.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/title.png";
+	texture["title"] = title;
 	let soul_red = new Image();
 	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_red.png";
 	texture["soul_red"] = soul_red;
@@ -645,17 +693,30 @@ function reset() {
 	let fight0 = new Image();
 	fight0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/fight0.png";
 	texture["fight0"] = fight0;
-	let item0 = new Image();
-	item0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/item0.png";
-	texture["item0"] = item0;
 	let act0 = new Image();
 	act0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/act0.png";
 	texture["act0"] = act0;
+	let item0 = new Image();
+	item0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/item0.png";
+	texture["item0"] = item0;
+	let mercy0 = new Image();
+	mercy0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/mercy0.png";
+	texture["mercy0"] = mercy0;
 	// load audio
 	let impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
 	impact.type = 'audio/mp3';
 	impact.loop = false;
 	audio["impact"] = impact
+	// load music
+	let theme0 = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/theme0.mp3?raw=true")
+	theme0.type = 'audio/mp3';
+	theme0.loop = false;
+	audio["theme0"] = theme0
+	// run
+	if (s["run"] != true) {
+		s["run"] = true;
+		run();
+	}
 }
 
 // event listeners
