@@ -1,13 +1,17 @@
 function load_command_test() {
 	command.push(
 		{
+			"name": "option",
+			"hidden": false,
+		},
+		{
 			"name": "wait",
 			"until": "load",
 			"time": 0,
 		},
 		{
 			"name": "sans",
-			"id": 0,
+			"id": 1,
 			"hidden": false,
 		},
 		{
@@ -56,6 +60,10 @@ function load_command_test() {
 function load_command_animation_test() {
 	command.push(
 		{
+			"name": "option",
+			"hidden": false,
+		},
+		{
 			"name": "wait",
 			"until": "load",
 			"time": 0,
@@ -63,6 +71,21 @@ function load_command_animation_test() {
 		{
 			"name": "sans",
 			"id": 0,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 1,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 2,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 3,
 			"hidden": true,
 		},
 		{
@@ -75,7 +98,19 @@ function load_command_animation_test() {
 		},
 		{
 			"name": "animate",
-			"preset": "sans1_fadein",
+			"preset": "sans0_intro",
+		},
+		{
+			"name": "animate",
+			"preset": "sans1_intro",
+		},
+		{
+			"name": "animate",
+			"preset": "sans2_intro",
+		},
+		{
+			"name": "animate",
+			"preset": "sans3_intro",
 		},
 	)
 }
@@ -111,7 +146,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -124,7 +159,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -137,7 +172,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -150,7 +185,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -163,7 +198,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -176,7 +211,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -189,7 +224,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -202,7 +237,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -215,7 +250,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 15,
 		},
 		{
 			"name": "soul",
@@ -231,10 +266,14 @@ function load_command_lmao() {
 
 function load_command_intro() {
 	command.push(
-		// hide soul, box, sans
+		// hide soul, box, sans, option
 		{
 			"name": "box",
 			"preset": "square",
+			"hidden": true,
+		},
+		{
+			"name": "option",
 			"hidden": true,
 		},
 		{
@@ -248,6 +287,21 @@ function load_command_intro() {
 		{
 			"name": "sans",
 			"id": 0,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 1,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 2,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 3,
 			"hidden": true,
 		},
 		// wait until loaded to keep music synced
@@ -294,11 +348,6 @@ function load_command_intro() {
 			"gravity": "down",
 			"force": 1,
 		},
-		// sans entering animation
-		{
-			"name": "animate",
-			"preset": "sans_intro",
-		},
 		// pulse title
 		{
 			"name": "animate",
@@ -313,7 +362,7 @@ function load_command_intro() {
 			"name": "animate",
 			"preset": "title",
 		},
-		// sans1 (last breath) enter animation
+		// sans(es) enter animation
 		{
 			"name": "wait",
 			"until": "time",
@@ -321,7 +370,7 @@ function load_command_intro() {
 		},
 		{
 			"name": "animate",
-			"preset": "sans1_fadein",
+			"preset": "sans1_intro",
 		},
 		{
 			"name": "wait",
@@ -329,9 +378,69 @@ function load_command_intro() {
 			"time": 300,
 		},
 		{
+			"name": "animate",
+			"preset": "sans2_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 250,
+		},
+		{
+			"name": "animate",
+			"preset": "sans0_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 200,
+		},
+		{
+			"name": "animate",
+			"preset": "sans3_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 100,
+		},
+		{
+			"name": "animate",
+			"preset": "title",
+		},
+		// flash
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 200,
+		},
+		{
+			"name": "soul",
+			"mode": "red",
+			"pulse": true,
+			"hidden": true,
+			"gravity": "down",
+			"force": 1,
+		},
+		{
 			"name": "sans",
 			"id": 0,
-			"hidden": false,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 1,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 2,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 3,
+			"hidden": true,
 		},
 	)
 }

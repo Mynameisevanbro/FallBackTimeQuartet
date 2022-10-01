@@ -23,7 +23,10 @@ var s = {
 	"force": 0,
 	"lock": false,  // can move?
 	// sans
-	"sans1_hidden": false,
+	"sans0_hidden": false,  // error sans
+	"sans1_hidden": false,  // last breath
+	"sans2_hidden": false,  // slackertale sans
+	"sans3_hidden": false,  // sudden changes sans
 	// controls
 	"left": false,
 	"left_enabled": false,
@@ -55,6 +58,7 @@ var box = {
 }
 var texture = {
 	// options data
+	"opt_hidden": false,
 	"opt_xm": 0,  // x multiplier
 	"opt_y": 0,
 	"opt_w": 0,
@@ -62,17 +66,26 @@ var texture = {
 	"opt_h": 0,
 }
 var audio = {
-	"impact": null,
+	"impact": [],
+	"impact_len": 600,
+	"impact_channel": [0, 0, 0, 0],
 	"theme0": null,
+	"theme0_len": 30000,
+	"theme0_channel": [0],
 }
 var command = []
 
 
 // system
+function current_time() {
+	return +new Date()
+}
+
+
 function manage_fps(){
 	// set frames
 	s["frame"] ++;
-	s["timeframe"].push(+new Date());
+	s["timeframe"].push(current_time());
 	s["fps"] = s["timeframe"].length;
 	// fps average
 	s["fps_avg_arrary"].push(s["fps"])
@@ -93,6 +106,39 @@ function manage_fps(){
 		s["timeout"] += 0.05;
 	} else if (s["fps"] < s["fps_set"]) {
 		s["timeout"] -= 0.05;
+	}
+}
+
+
+function manage_audio(file, volume=1) {
+	let played = false
+	// audio is playing?
+	for (let i = 0; i < audio[`${file}_channel`].length; i ++) {
+		// is audio playing?
+		if (audio[`${file}_channel`][i] != 0) {
+			// has audio finished playing?
+			if (current_time() - audio[`${file}_channel`][i] >= audio[`${file}_len`]) {
+				// reset audio channel
+				audio[`${file}_channel`][i] = 0
+			}
+		}
+	}
+	// play audio
+	for (let i = 0; i < audio[`${file}_channel`].length; i ++) {
+		// is audio channel available?
+		if (audio[`${file}_channel`][i] == 0) {
+			// play audio
+			audio[file][i].volume = volume
+			audio[file][i].play()
+			played = true
+			// set channel as busy
+			audio[`${file}_channel`][i] = current_time()
+			break
+		}
+	}
+	// error log
+	if (played == false) {
+		console.log("Audio Error: Not enough channels")
 	}
 }
 
@@ -235,6 +281,9 @@ function manage_command() {
 		if (command[i]["name"] == "sans") {
 			con.innerHTML += `sans.id${command[i]["id"]}\n`
 		}
+		if (command[i]["name"] == "option") {
+			con.innerHTML += `option.${command[i]["hidden"]}\n`
+		}
 	}
 	// run through & execute commands
 	for (let i = 0; i < command.length; i ++) {
@@ -307,6 +356,12 @@ function manage_command() {
 			} else if (command[0]["name"] == "sans") {
 				// apply values
 				s[`sans${command[0]["id"]}_hidden`] = command[0]["hidden"]
+				// finish task
+				command.shift()
+			}
+			else if (command[0]["name"] == "option") {
+				// apply values
+				texture["opt_hidden"] = command[0]["hidden"]
 				// finish task
 				command.shift()
 			}
@@ -469,16 +524,25 @@ function manage_animation() {
 	let percent = 0;
 	for (let i = 0; i < s["animation"].length; i ++) {
 		if (s["animation"][i]["name"] == "title") {
-			percent = Math.round((s["animation"][i]["frame"] / 2) * 100)
+			percent = Math.round(s["animation"][i]["frame"] * 50)
 			con.innerHTML += `${percent}% - title\n`
 		} else if (s["animation"][i]["name"] == "sans_intro") {
 			con.innerHTML += "sans_intro\n"
 		} else if (s["animation"][i]["name"] == "box_down") {
 			percent = Math.round(s["animation"][i]["frame"] * 100)
 			con.innerHTML += `${percent}% - box_down\n`
-		} else if (s["animation"][i]["name"] == "sans1_fadein") {
+		} else if (s["animation"][i]["name"] == "sans0_intro") {
+				percent = Math.round(s["animation"][i]["frame"] * 100)
+				con.innerHTML += `${percent}% - sans0_intro\n`
+		} else if (s["animation"][i]["name"] == "sans1_intro") {
+			percent = Math.round(s["animation"][i]["frame"] * 50)
+			con.innerHTML += `${percent}% - sans1_intro\n`
+		} else if (s["animation"][i]["name"] == "sans2_intro") {
 			percent = Math.round(s["animation"][i]["frame"] * 100)
-			con.innerHTML += `${percent}% - sans1_fadein\n`
+			con.innerHTML += `${percent}% - sans2_intro\n`
+		} else if (s["animation"][i]["name"] == "sans3_intro") {
+			percent = Math.round(s["animation"][i]["frame"] * 100)
+			con.innerHTML += `${percent}% - sans3_intro\n`
 		}
 	}
 	// execute animations
@@ -522,8 +586,27 @@ function manage_animation() {
 			if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1)
 			}
+		// sans 0 (error sans) intro
+		} else if (s["animation"][i]["name"] == "sans0_intro") {
+			// animate
+			s["animation"][i]["frame"] += 0.005;
+			// draw sans
+			let w = canvas_width / 6.3
+			let h = (w * 75) / 49
+			let x0 = -w
+			let x1 = (canvas_width / 2) - (w * 2)
+			let y = canvas_height / 40
+			// slide left to position
+			if (s["animation"][i]["frame"] < 1) {
+				let dist = (x0 - x1) * s["animation"][i]["frame"]
+				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 1) {
+				s["animation"].splice(i, 1)
+				s["sans0_hidden"] = false;
+			}
 		// sans1 (last breath) intro
-		} else if (s["animation"][i]["name"] == "sans1_fadein") {
+		} else if (s["animation"][i]["name"] == "sans1_intro") {
 			// animate
 			s["animation"][i]["frame"] += 0.005;
 			// draw sans
@@ -540,11 +623,49 @@ function manage_animation() {
 			} else if (s["animation"][i]["frame"] < 2) {
 				s["animation"][i]["frame"] += 0.005;
 				let dist = (x0 - (x1 + w)) * (1 - s["animation"][i]["frame"])
-				canvas_img(texture["sans1_still"], [x0 + dist + s["x_shake"], y + s["y_shake"], w, h]);
+				canvas_img(texture["sans1_still"], [x0 + dist, y, w, h]);
 			// end animation
 			} else if (s["animation"][i]["frame"] > 2) {
 				s["animation"].splice(i, 1)
 				s["sans1_hidden"] = false;
+			}
+		// sans 2 (slackertale) intro
+		} else if (s["animation"][i]["name"] == "sans2_intro") {
+			// animate
+			s["animation"][i]["frame"] += 0.005;
+			// draw sans
+			let w = canvas_width / 6.3
+			let h = (w * 75) / 49
+			let x0 = canvas_width
+			let x1 = (canvas_width / 2) - (w * 2) + w * 2
+			let y = canvas_height / 40
+			// slide left to position
+			if (s["animation"][i]["frame"] < 1) {
+				let dist = (x0 - x1) * s["animation"][i]["frame"]
+				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 1) {
+				s["animation"].splice(i, 1)
+				s["sans2_hidden"] = false;
+			}
+		// sans 3 (sudden changes) intro
+		} else if (s["animation"][i]["name"] == "sans3_intro") {
+			// animate
+			s["animation"][i]["frame"] += 0.005;
+			// draw sans
+			let w = canvas_width / 6.3
+			let h = (w * 75) / 49
+			let x0 = canvas_width
+			let x1 = (canvas_width / 2) - (w * 2) + w * 3
+			let y = canvas_height / 40
+			// slide left to position
+			if (s["animation"][i]["frame"] < 1) {
+				let dist = (x0 - x1) * s["animation"][i]["frame"]
+				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 1) {
+				s["animation"].splice(i, 1)
+				s["sans3_hidden"] = false;
 			}
 		}
 	}
@@ -554,19 +675,25 @@ function manage_animation() {
 function manage_sans() {
 	// positions
 	let w = canvas_width / 6.3;
-		let h = (w * 75) / 49;
-		let x = (canvas_width / 2) - (w * 2);
-		let y = canvas_height / 40;
+	let h = (w * 75) / 49;
+	let x = (canvas_width / 2) - (w * 2);
+	let y = canvas_height / 40;
 	// sans0 (error)
-	canvas_img(texture["sans1_still"], [x + s["x_shake"], y + s["y_shake"], w, h]);
+	if (s["sans0_hidden"] == false) {
+		canvas_img(texture["sans1_still"], [x + s["x_shake"], y + s["y_shake"], w, h]);
+	}
 	// draw sans1 (last breath)
 	if (s["sans1_hidden"] == false) {
 		canvas_img(texture["sans1_still"], [x + w + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 	// draw sans2
-	canvas_img(texture["sans1_still"], [x + w * 2 +  + s["x_shake"], y + s["y_shake"], w, h]);
+	if (s["sans2_hidden"] == false) {
+		canvas_img(texture["sans1_still"], [x + w * 2 + s["x_shake"], y + s["y_shake"], w, h]);
+	}
 	// draw sans3
-	canvas_img(texture["sans1_still"], [x + w * 3 +  + s["x_shake"], y + s["y_shake"], w, h]);
+	if (s["sans3_hidden"] == false) {
+		canvas_img(texture["sans1_still"], [x + w * 3 + s["x_shake"], y + s["y_shake"], w, h]);
+	}
 }
 
 
@@ -579,7 +706,8 @@ function run() {
 	// draw sans
 	manage_sans();
 	// draw options
-	canvas_img(texture["fight0"],
+	if (texture["opt_hidden"] == false) {
+		canvas_img(texture["fight0"],
 		[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
 	canvas_img(texture["act0"],
 		[texture["opt_xm"] + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
@@ -587,6 +715,7 @@ function run() {
 		[texture["opt_xm"] * 2 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
 	canvas_img(texture["mercy0"],
 		[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+	}
 	// draw soul pulse
 	if (s["hidden"] == false) {
 		if (s["pulse"]) {
@@ -633,7 +762,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "left") {
 			if (s["force"] > 19) {
-				audio["impact"].play()
+				manage_audio("impact")
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -646,7 +775,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "right") {
 			if (s["force"] > 19) {
-				audio["impact"].play()
+				manage_audio("impact")
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -659,7 +788,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "up") {
 			if (s["force"] > 19) {
-				audio["impact"].play()
+				manage_audio("impact")
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -672,7 +801,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "down") {
 			if (s["force"] > 19) {
-				audio["impact"].play()
+				manage_audio("impact")
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -738,10 +867,13 @@ function reset() {
 		texture[sprites[i]] = img;
 	}
 	// load audio
-	let impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
-	impact.type = 'audio/mp3';
-	impact.loop = false;
-	audio["impact"] = impact
+	let impact;
+	for (i = 0; i < audio["impact_channel"].length; i ++) {
+		impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
+		impact.type = 'audio/mp3';
+		impact.loop = false;
+		audio["impact"].push(impact)
+	}
 	// load music
 	let theme0 = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/theme0.mp3?raw=true")
 	theme0.type = 'audio/mp3';
