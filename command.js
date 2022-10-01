@@ -94,6 +94,10 @@ function load_command_animation_test() {
 		},
 		{
 			"name": "animate",
+			"preset": "title_phase1",
+		},
+		{
+			"name": "animate",
 			"preset": "box_down",
 		},
 		{
@@ -304,23 +308,73 @@ function load_command_intro() {
 			"id": 3,
 			"hidden": true,
 		},
-		// wait until loaded to keep music synced
+		// play music
 		{
 			"name": "wait",
 			"until": "load",
 			"time": 0,
 		},
-		// play music
 		{
 			"name": "audio",
 			"file": "theme0",
 		},
+		// sans(es) enter animation
+		{
+			"name": "animate",
+			"preset": "sans1_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 150,
+		},
+		{
+			"name": "animate",
+			"preset": "sans2_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 150,
+		},
+		{
+			"name": "animate",
+			"preset": "sans0_intro",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 75,
+		},
+		{
+			"name": "animate",
+			"preset": "title",
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 75,
+		},
+		{
+			"name": "animate",
+			"preset": "sans3_intro",
+		},
 		// animate box down
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 110,
+		},
 		{
 			"name": "animate",
 			"preset": "box_down",
 		},
 		// show soul
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 15,
+		},
 		{
 			"name": "wait",
 			"until": "time",
@@ -348,21 +402,7 @@ function load_command_intro() {
 			"gravity": "down",
 			"force": 1,
 		},
-		// pulse title
-		{
-			"name": "animate",
-			"preset": "title",
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 200,
-		},
-		{
-			"name": "animate",
-			"preset": "title",
-		},
-		// sans(es) enter animation
+		// show phase 1
 		{
 			"name": "wait",
 			"until": "time",
@@ -370,49 +410,13 @@ function load_command_intro() {
 		},
 		{
 			"name": "animate",
-			"preset": "sans1_intro",
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 300,
-		},
-		{
-			"name": "animate",
-			"preset": "sans2_intro",
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 250,
-		},
-		{
-			"name": "animate",
-			"preset": "sans0_intro",
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 200,
-		},
-		{
-			"name": "animate",
-			"preset": "sans3_intro",
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 100,
-		},
-		{
-			"name": "animate",
-			"preset": "title",
+			"preset": "title_phase1",
 		},
 		// flash
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 200,
+			"time": 600,
 		},
 		{
 			"name": "soul",

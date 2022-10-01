@@ -144,15 +144,17 @@ function manage_audio(file, volume=1) {
 
 
 // GUI
-function canvas_text(text, pos, size, color, font, alignment="center") {
+function canvas_text(text, pos, size, color, font, alignment="center", opacity=1) {
 	// define canvas
 	const canvas = document.getElementById("canvas");
 	const ctx = canvas.getContext("2d");
 	// draw title
+	ctx.globalAlpha = opacity
 	ctx.font = `${size}px ${font}`;
 	ctx.textAlign = alignment;
 	ctx.fillStyle = color;
 	ctx.fillText(text, pos[0], pos[1]);
+	ctx.globalAlpha = 1
 }
 
 
@@ -284,6 +286,11 @@ function manage_command() {
 		if (command[i]["name"] == "option") {
 			con.innerHTML += `option.${command[i]["hidden"]}\n`
 		}
+		// prevent lag by limiting number of commands shown
+		if (i >= 9) {
+			con.innerHTML += `+ ${command.length} commands`
+			break
+		}
 	}
 	// run through & execute commands
 	for (let i = 0; i < command.length; i ++) {
@@ -293,7 +300,7 @@ function manage_command() {
 				// wait type load (wait until program fully loads)
 				if (command[0]["until"] == "load") {
 					// detect if loaded, if not loaded, wait
-					if (s["fps_avg"] == 60) {
+					if (s["fps_avg"] <= s["fps_set"]) {
 						// finish task
 						command.shift()
 					} else {
@@ -526,8 +533,9 @@ function manage_animation() {
 		if (s["animation"][i]["name"] == "title") {
 			percent = Math.round(s["animation"][i]["frame"] * 50)
 			con.innerHTML += `${percent}% - title\n`
-		} else if (s["animation"][i]["name"] == "sans_intro") {
-			con.innerHTML += "sans_intro\n"
+		} else if (s["animation"][i]["name"] == "title_phase1") {
+			percent = Math.round(s["animation"][i]["frame"] * 16.6)
+			con.innerHTML += `${percent}% - title_phase1\n`
 		} else if (s["animation"][i]["name"] == "box_down") {
 			percent = Math.round(s["animation"][i]["frame"] * 100)
 			con.innerHTML += `${percent}% - box_down\n`
@@ -566,6 +574,46 @@ function manage_animation() {
 			} else if (s["animation"][i]["frame"] > 2){
 				s["animation"].splice(i, 1)
 			}
+		// title phase 1
+		} else if (s["animation"][i]["name"] == "title_phase1") {
+			// animate
+			s["animation"][i]["frame"] += 0.01;
+			// define positions
+			let y0 = canvas_height / 2;
+			let y1 = (canvas_height / 2) - (canvas_height / 10);
+			let w = canvas_width / 2;
+			let x = (canvas_width / 2) - (w / 2);
+			let h = (w * 53) / 170;
+			// fade in
+			if (s["animation"][i]["frame"] < 1) {
+				canvas_img(texture["title"], [x, y0, w, h], 0, s["animation"][i]["frame"]);
+			// go up
+			} else if (s["animation"][i]["frame"] < 2){
+				let dist = (y1 - y0) * (s["animation"][i]["frame"] - 1)
+				canvas_img(texture["title"], [x, y0 + dist, w, h]);
+			// phase 1 message fade in
+			} else if (s["animation"][i]["frame"] < 5){
+				// draw phase 1 text
+				let y_text = (canvas_height / 1.5)
+				canvas_text("-=[Phase 1]=-", [w, y_text], 30, "red", "sans-serif", "center",
+					s["animation"][i]["frame"] - 2);
+				// draw title image
+				canvas_img(texture["title"], [x, y1, w, h]);
+			// draw sub text
+			} else if (s["animation"][i]["frame"] < 6){
+				// draw phase 1 text
+				let y_text = (canvas_height / 1.5)
+				canvas_text("-=[Phase 1]=-", [w, y_text], 30, "red", "sans-serif", "center");
+				// draw subtext
+				y_text = (canvas_height / 1.4)
+				canvas_text("Slackers Nevermore", [w, y_text], 20, "white", "sans-serif", "center",
+					s["animation"][i]["frame"] - 5);
+				// draw title image
+				canvas_img(texture["title"], [x, y1, w, h]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 6){
+				s["animation"].splice(i, 1)
+			}
 		// box down
 		} else if (s["animation"][i]["name"] == "box_down") {
 			// animate
@@ -589,17 +637,15 @@ function manage_animation() {
 		// sans 0 (error sans) intro
 		} else if (s["animation"][i]["name"] == "sans0_intro") {
 			// animate
-			s["animation"][i]["frame"] += 0.005;
+			s["animation"][i]["frame"] += 0.01;
 			// draw sans
 			let w = canvas_width / 6.3
 			let h = (w * 75) / 49
-			let x0 = -w
-			let x1 = (canvas_width / 2) - (w * 2)
+			let x = (canvas_width / 2) - (w * 2)
 			let y = canvas_height / 40
-			// slide left to position
+			// fade in
 			if (s["animation"][i]["frame"] < 1) {
-				let dist = (x0 - x1) * s["animation"][i]["frame"]
-				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+				canvas_img(texture["sans1_still"], [x, y, w, h], 0, s["animation"][i]["frame"]);
 			// end animation
 			} else if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1)
@@ -608,7 +654,7 @@ function manage_animation() {
 		// sans1 (last breath) intro
 		} else if (s["animation"][i]["name"] == "sans1_intro") {
 			// animate
-			s["animation"][i]["frame"] += 0.005;
+			s["animation"][i]["frame"] += 0.01;
 			// draw sans
 			let w = canvas_width / 6.3
 			let h = (w * 75) / 49
@@ -632,17 +678,15 @@ function manage_animation() {
 		// sans 2 (slackertale) intro
 		} else if (s["animation"][i]["name"] == "sans2_intro") {
 			// animate
-			s["animation"][i]["frame"] += 0.005;
+			s["animation"][i]["frame"] += 0.01;
 			// draw sans
 			let w = canvas_width / 6.3
 			let h = (w * 75) / 49
-			let x0 = canvas_width
-			let x1 = (canvas_width / 2) - (w * 2) + w * 2
+			let x = canvas_width / 2
 			let y = canvas_height / 40
-			// slide left to position
+			// fade in
 			if (s["animation"][i]["frame"] < 1) {
-				let dist = (x0 - x1) * s["animation"][i]["frame"]
-				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+				canvas_img(texture["sans1_still"], [x, y, w, h], 0, s["animation"][i]["frame"]);
 			// end animation
 			} else if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1)
@@ -651,17 +695,15 @@ function manage_animation() {
 		// sans 3 (sudden changes) intro
 		} else if (s["animation"][i]["name"] == "sans3_intro") {
 			// animate
-			s["animation"][i]["frame"] += 0.005;
+			s["animation"][i]["frame"] += 0.01;
 			// draw sans
 			let w = canvas_width / 6.3
 			let h = (w * 75) / 49
-			let x0 = canvas_width
-			let x1 = (canvas_width / 2) - (w * 2) + w * 3
+			let x = (canvas_width / 2) + w
 			let y = canvas_height / 40
 			// slide left to position
 			if (s["animation"][i]["frame"] < 1) {
-				let dist = (x0 - x1) * s["animation"][i]["frame"]
-				canvas_img(texture["sans1_still"], [x0 - dist, y, w, h]);
+				canvas_img(texture["sans1_still"], [x, y, w, h], 0, s["animation"][i]["frame"]);
 			// end animation
 			} else if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1)
@@ -686,11 +728,11 @@ function manage_sans() {
 	if (s["sans1_hidden"] == false) {
 		canvas_img(texture["sans1_still"], [x + w + s["x_shake"], y + s["y_shake"], w, h]);
 	}
-	// draw sans2
+	// draw sans2 (slackertale)
 	if (s["sans2_hidden"] == false) {
 		canvas_img(texture["sans1_still"], [x + w * 2 + s["x_shake"], y + s["y_shake"], w, h]);
 	}
-	// draw sans3
+	// draw sans3 (sudden changes)
 	if (s["sans3_hidden"] == false) {
 		canvas_img(texture["sans1_still"], [x + w * 3 + s["x_shake"], y + s["y_shake"], w, h]);
 	}
