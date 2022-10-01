@@ -22,6 +22,8 @@ var s = {
 	"gravity": "down",
 	"force": 0,
 	"lock": false,  // can move?
+	// sans
+	"sans1_hidden": false,
 	// controls
 	"left": false,
 	"left_enabled": false,
@@ -52,23 +54,13 @@ var box = {
 	"hlw": 0,  // half line width
 }
 var texture = {
-	"title": null,
-	// soul textures
-	"soul_red": null,
-	"soul_blue": null,
 	// options data
 	"opt_xm": 0,  // x multiplier
 	"opt_y": 0,
 	"opt_w": 0,
 	"opt_xo": 0,  // x offset
 	"opt_h": 0,
-	// option textures
-	"fight0": null,
-	"act0": null,
-	"item0": null,
 }
-
-
 var audio = {
 	"impact": null,
 	"theme0": null,
@@ -240,11 +232,14 @@ function manage_command() {
 		if (command[i]["name"] == "animate") {
 			con.innerHTML += `animate.${command[i]["preset"]}\n`
 		}
+		if (command[i]["name"] == "sans") {
+			con.innerHTML += `sans.id${command[i]["id"]}\n`
+		}
 	}
 	// run through & execute commands
 	for (let i = 0; i < command.length; i ++) {
+		// execute commands
 		try {
-			// execute
 			if (command[0]["name"] == "wait") {
 				// wait type load (wait until program fully loads)
 				if (command[0]["until"] == "load") {
@@ -255,9 +250,8 @@ function manage_command() {
 					} else {
 						break
 					}
-				}
 				// wait type time (wait until time is up)
-				if (command[0]["until"] == "time") {
+				} else if (command[0]["until"] == "time") {
 					// detect if loaded, if not loaded, wait
 					if (command[0]["time"] <= 0) {
 						// finish task
@@ -267,8 +261,7 @@ function manage_command() {
 						break
 					}
 				}
-			}
-			if (command[0]["name"] == "position") {
+			} else if (command[0]["name"] == "position") {
 				// position preset
 				if (command[0]["preset"] == true) {
 					// center
@@ -279,15 +272,13 @@ function manage_command() {
 				}
 				// finish task
 				command.shift()
-			}
-			if (command[0]["name"] == "box") {
+			} else if (command[0]["name"] == "box") {
 				// apply values
 				box["preset"] = command[0]["preset"]
 				box["hidden"] = command[0]["hidden"]
 				// finish task
 				command.shift()
-			}
-			if (command[0]["name"] == "soul") {
+			} else if (command[0]["name"] == "soul") {
 				// apply values
 				s["m"] = command[0]["mode"]
 				s["gravity"] = command[0]["gravity"]
@@ -299,20 +290,23 @@ function manage_command() {
 				s["down_enabled"] = false;
 				// finish task
 				command.shift()
-			}
-			if (command[0]["name"] == "audio") {
+			} else if (command[0]["name"] == "audio") {
 				// play audio
 				audio[command[0]["file"]].play()
 				// finish task
 				command.shift()
-			}
-			if (command[0]["name"] == "animate") {
+			} else if (command[0]["name"] == "animate") {
 				// push animation
 				obj = {
 					"name": command[0]["preset"],
 					"frame": 0,
 				}
 				s["animation"].push(obj)
+				// finish task
+				command.shift()
+			} else if (command[0]["name"] == "sans") {
+				// apply values
+				s[`sans${command[0]["id"]}_hidden`] = command[0]["hidden"]
 				// finish task
 				command.shift()
 			}
@@ -482,6 +476,9 @@ function manage_animation() {
 		} else if (s["animation"][i]["name"] == "box_down") {
 			percent = Math.round(s["animation"][i]["frame"] * 100)
 			con.innerHTML += `${percent}% - box_down\n`
+		} else if (s["animation"][i]["name"] == "sans1_fadein") {
+			percent = Math.round(s["animation"][i]["frame"] * 100)
+			con.innerHTML += `${percent}% - sans1_fadein\n`
 		}
 	}
 	// execute animations
@@ -525,13 +522,51 @@ function manage_animation() {
 			if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1)
 			}
-		// sans intro
-		} else if (s["animation"][i]["name"] == "sans_intro") {
+		// sans1 (last breath) intro
+		} else if (s["animation"][i]["name"] == "sans1_fadein") {
 			// animate
-			s["animation"][i]["frame"] += 0.01;
-			s["animation"].splice(i, 1)
+			s["animation"][i]["frame"] += 0.005;
+			// draw sans
+			let w = canvas_width / 6.3
+			let h = (w * 75) / 49
+			let x0 = (canvas_width / 2) - (w / 2)
+			let x1 = (canvas_width / 2) - (w * 2)
+			let y = canvas_height / 40
+			// fade in at center of screen
+			if (s["animation"][i]["frame"] < 1) {
+				canvas_img(texture["sans1_still"], [x0 + s["x_shake"], y + s["y_shake"], w, h], 0,
+				s["animation"][i]["frame"]);
+			// move to correct position
+			} else if (s["animation"][i]["frame"] < 2) {
+				s["animation"][i]["frame"] += 0.005;
+				let dist = (x0 - (x1 + w)) * (1 - s["animation"][i]["frame"])
+				canvas_img(texture["sans1_still"], [x0 + dist + s["x_shake"], y + s["y_shake"], w, h]);
+			// end animation
+			} else if (s["animation"][i]["frame"] > 2) {
+				s["animation"].splice(i, 1)
+				s["sans1_hidden"] = false;
+			}
 		}
 	}
+}
+
+
+function manage_sans() {
+	// positions
+	let w = canvas_width / 6.3;
+		let h = (w * 75) / 49;
+		let x = (canvas_width / 2) - (w * 2);
+		let y = canvas_height / 40;
+	// sans0 (error)
+	canvas_img(texture["sans1_still"], [x + s["x_shake"], y + s["y_shake"], w, h]);
+	// draw sans1 (last breath)
+	if (s["sans1_hidden"] == false) {
+		canvas_img(texture["sans1_still"], [x + w + s["x_shake"], y + s["y_shake"], w, h]);
+	}
+	// draw sans2
+	canvas_img(texture["sans1_still"], [x + w * 2 +  + s["x_shake"], y + s["y_shake"], w, h]);
+	// draw sans3
+	canvas_img(texture["sans1_still"], [x + w * 3 +  + s["x_shake"], y + s["y_shake"], w, h]);
 }
 
 
@@ -542,7 +577,7 @@ function run() {
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
 	// draw sans
-	
+	manage_sans();
 	// draw options
 	canvas_img(texture["fight0"],
 		[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
@@ -682,28 +717,26 @@ function reset() {
 	texture["opt_w"] = canvas_width / 5
 	texture["opt_xo"] = (texture["opt_xm"] - texture["opt_w"]) / 2
 	texture["opt_h"] = (texture["opt_w"] * 40) / 113
-	// load images
-	let title = new Image();
-	title.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/title.png";
-	texture["title"] = title;
-	let soul_red = new Image();
-	soul_red.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_red.png";
-	texture["soul_red"] = soul_red;
-	let soul_blue = new Image();
-	soul_blue.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/soul_blue.png";
-	texture["soul_blue"] = soul_blue;
-	let fight0 = new Image();
-	fight0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/fight0.png";
-	texture["fight0"] = fight0;
-	let act0 = new Image();
-	act0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/act0.png";
-	texture["act0"] = act0;
-	let item0 = new Image();
-	item0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/item0.png";
-	texture["item0"] = item0;
-	let mercy0 = new Image();
-	mercy0.src = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/mercy0.png";
-	texture["mercy0"] = mercy0;
+	// load textures
+	let url = "https://raw.githubusercontent.com/Mynameisevanbro/FallBackTimeQuartet.io/main/texture/"
+	sprites = [
+		"title",
+		// sans
+		"sans1_still",
+		// soul
+		"soul_red",
+		"soul_blue",
+		// options
+		"fight0",
+		"act0",
+		"item0",
+		"mercy0",
+	]
+	for (let i = 0; i < sprites.length; i ++) {
+		let img = new Image();
+		img.src = `${url}${sprites[i]}.png`;
+		texture[sprites[i]] = img;
+	}
 	// load audio
 	let impact = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/impact.mp3?raw=true")
 	impact.type = 'audio/mp3';
