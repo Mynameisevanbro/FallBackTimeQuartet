@@ -1,4 +1,4 @@
-// varables - dddddddddddddddd
+// varables
 var canvas_width;
 var canvas_height;
 var s = {
@@ -541,6 +541,8 @@ function run() {
 	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
+	// draw sans
+	
 	// draw options
 	canvas_img(texture["fight0"],
 		[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])

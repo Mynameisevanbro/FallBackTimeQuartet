@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function load_command_test() {
 	command.push(
 		{
