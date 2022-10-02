@@ -11,8 +11,31 @@ function load_command_test() {
 		},
 		{
 			"name": "sans",
+			"id": 0,
+			"hidden": true,
+			"animation": "idle",
+			"head": "sans1_head_eyeless0"
+		},
+		{
+			"name": "sans",
 			"id": 1,
 			"hidden": false,
+			"animation": "idle",
+			"head": "sans1_head_eyeless0"
+		},
+		{
+			"name": "sans",
+			"id": 2,
+			"hidden": true,
+			"animation": "idle",
+			"head": "sans1_head_eyeless0"
+		},
+		{
+			"name": "sans",
+			"id": 3,
+			"hidden": true,
+			"animation": "idle",
+			"head": "sans1_head_eyeless0"
 		},
 		{
 			"name": "box",
@@ -42,7 +65,7 @@ function load_command_test() {
 		{
 			"name": "soul",
 			"mode": "red",
-			"pulse": true,
+			"pulse": false,
 			"hidden": false,
 			"gravity": "down",
 			"force": 1,
