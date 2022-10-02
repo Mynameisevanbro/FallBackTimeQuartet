@@ -32,7 +32,7 @@ function load_command_test() {
 			"pulse": false,
 			"hidden": false,
 			"gravity": "down",
-			"force": 5,
+			"force": 8,
 		},
 		{
 			"name": "wait",
