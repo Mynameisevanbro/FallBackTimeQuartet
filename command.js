@@ -54,21 +54,47 @@ function load_command_test() {
 			"mode": "blue",
 			"pulse": false,
 			"hidden": false,
-			"gravity": "down",
+			"gravity": "left",
 			"force": 8,
 		},
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 50,
+			"time": 100,
 		},
 		{
 			"name": "soul",
-			"mode": "red",
+			"mode": "blue",
+			"pulse": false,
+			"hidden": false,
+			"gravity": "right",
+			"force": 8,
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 100,
+		},
+		{
+			"name": "soul",
+			"mode": "blue",
+			"pulse": false,
+			"hidden": false,
+			"gravity": "up",
+			"force": 8,
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 100,
+		},
+		{
+			"name": "soul",
+			"mode": "blue",
 			"pulse": false,
 			"hidden": false,
 			"gravity": "down",
-			"force": 1,
+			"force": 8,
 		},
 		{
 			"name": "box",
@@ -91,26 +117,26 @@ function load_command_animation_test() {
 			"until": "load",
 			"time": 0,
 		},
-		{
-			"name": "sans",
-			"id": 0,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 1,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 2,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 3,
-			"hidden": true,
-		},
+		// {
+		// 	"name": "sans",
+		// 	"id": 0,
+		// 	"hidden": true,
+		// },
+		// {
+		// 	"name": "sans",
+		// 	"id": 1,
+		// 	"hidden": true,
+		// },
+		// {
+		// 	"name": "sans",
+		// 	"id": 2,
+		// 	"hidden": true,
+		// },
+		// {
+		// 	"name": "sans",
+		// 	"id": 3,
+		// 	"hidden": true,
+		// },
 		{
 			"name": "animate",
 			"preset": "title",
@@ -123,33 +149,28 @@ function load_command_animation_test() {
 			"name": "animate",
 			"preset": "box_down",
 		},
-		{
-			"name": "animate",
-			"preset": "sans0_intro",
-		},
+		// {
+		// 	"name": "animate",
+		// 	"preset": "sans0_intro",
+		// },
 		{
 			"name": "animate",
 			"preset": "sans1_intro",
 		},
-		{
-			"name": "animate",
-			"preset": "sans2_intro",
-		},
-		{
-			"name": "animate",
-			"preset": "sans3_intro",
-		},
+		// {
+		// 	"name": "animate",
+		// 	"preset": "sans2_intro",
+		// },
+		// {
+		// 	"name": "animate",
+		// 	"preset": "sans3_intro",
+		// },
 	)
 }
 
 
 function load_command_lmao() {
 	command.push(
-		{
-			"name": "wait",
-			"until": "load",
-			"time": 0,
-		},
 		{
 			"name": "box",
 			"preset": "square",
@@ -173,7 +194,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -186,7 +207,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -199,7 +220,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -212,7 +233,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -225,7 +246,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -238,7 +259,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -251,7 +272,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -264,7 +285,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",
@@ -277,7 +298,7 @@ function load_command_lmao() {
 		{
 			"name": "wait",
 			"until": "time",
-			"time": 15,
+			"time": 10,
 		},
 		{
 			"name": "soul",

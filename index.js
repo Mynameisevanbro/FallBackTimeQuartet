@@ -22,11 +22,25 @@ var s = {
 	"gravity": "down",
 	"force": 0,
 	"lock": false,  // can move?
-	// sans
-	"sans0_hidden": false,  // error sans
-	"sans1_hidden": false,  // last breath
-	"sans2_hidden": false,  // slackertale sans
-	"sans3_hidden": false,  // sudden changes sans
+	// (all) sans
+	"sans_size": 1,  // number multiplied by original file size
+	// error sans
+	"sans0_hidden": true,  
+	// last breath
+	"sans1_x": 0,
+	"sans1_y": 0,
+	"sans1_w": 0,
+	"sans1_hidden": false,
+	"sans1_animation": "still",
+	"sans1_animation_x": 0,
+	"sans1_animation_x_direction": "left",
+	"sans1_animation_y": 0,
+	"sans1_animation_y_direction": "up",
+	"sans1_head": "sans1_head",
+	// slackertale sans
+	"sans2_hidden": true,
+	// sudden changes sans
+	"sans3_hidden": true,
 	// controls
 	"left": false,
 	"left_enabled": false,
@@ -68,7 +82,7 @@ var texture = {
 var audio = {
 	"impact": [],
 	"impact_len": 600,
-	"impact_channel": [0, 0, 0, 0],
+	"impact_channel": [0, 0, 0, 0, 0],
 	"theme0": null,
 	"theme0_len": 30000,
 	"theme0_channel": [0],
@@ -322,55 +336,67 @@ function manage_command() {
 				if (command[0]["preset"] == true) {
 					// center
 					if (command[0]["preset_name"] == "center") {
-						s["x"] = box["x"] + (box["w"] / 2) - (s["w"] / 2)
-						s["y"] = box["y"] + (box["h"] / 2) - (s["h"] / 2)
+						s["x"] = box["x"] + (box["w"] / 2) - (s["w"] / 2);
+						s["y"] = box["y"] + (box["h"] / 2) - (s["h"] / 2);
 					}
 				}
 				// finish task
-				command.shift()
+				command.shift();
 			} else if (command[0]["name"] == "box") {
 				// apply values
-				box["preset"] = command[0]["preset"]
-				box["hidden"] = command[0]["hidden"]
+				box["preset"] = command[0]["preset"];
+				box["hidden"] = command[0]["hidden"];
 				// finish task
-				command.shift()
+				command.shift();
 			} else if (command[0]["name"] == "soul") {
 				// apply values
-				s["m"] = command[0]["mode"]
-				s["gravity"] = command[0]["gravity"]
-				s["force"] = command[0]["force"] * s["s"]
-				s["pulse"] = command[0]["pulse"]
-				s["hidden"] = command[0]["hidden"]
+				s["m"] = command[0]["mode"];
+				s["gravity"] = command[0]["gravity"];
+				s["force"] = command[0]["force"] * s["s"];
+				s["pulse"] = command[0]["pulse"];
+				s["hidden"] = command[0]["hidden"];
 				// reset gravity
 				s["up_enabled"] = false;
 				s["down_enabled"] = false;
+				// animate
+				if (s["m"] == "blue") {
+					s["sans1_animation_x"] = 0;
+					s["sans1_animation_y"] = 0;
+					if (s["gravity"] == "left" || s["gravity"] == "right") {
+						s["sans1_animation"] = "side";
+					} else if (s["gravity"] == "up") {
+						s["sans1_animation"] = "up";
+					} else if (s["gravity"] == "down") {
+						s["sans1_animation"] = "down";
+					}
+				}
 				// finish task
-				command.shift()
+				command.shift();
 			} else if (command[0]["name"] == "audio") {
 				// play audio
-				audio[command[0]["file"]].play()
+				audio[command[0]["file"]].play();
 				// finish task
-				command.shift()
+				command.shift();
 			} else if (command[0]["name"] == "animate") {
 				// push animation
 				obj = {
 					"name": command[0]["preset"],
 					"frame": 0,
 				}
-				s["animation"].push(obj)
+				s["animation"].push(obj);
 				// finish task
-				command.shift()
+				command.shift();
 			} else if (command[0]["name"] == "sans") {
 				// apply values
-				s[`sans${command[0]["id"]}_hidden`] = command[0]["hidden"]
+				s[`sans${command[0]["id"]}_hidden`] = command[0]["hidden"];
 				// finish task
-				command.shift()
+				command.shift();
 			}
 			else if (command[0]["name"] == "option") {
 				// apply values
-				texture["opt_hidden"] = command[0]["hidden"]
+				texture["opt_hidden"] = command[0]["hidden"];
 				// finish task
-				command.shift()
+				command.shift();
 			}
 		} catch {
 
@@ -716,24 +742,245 @@ function manage_animation() {
 
 function manage_sans() {
 	// positions
-	let w = canvas_width / 6.3;
-	let h = (w * 75) / 49;
+	let w = 0;
+	let h = 0;
 	let x = (canvas_width / 2) - (w * 2);
 	let y = canvas_height / 40;
 	// sans0 (error)
 	if (s["sans0_hidden"] == false) {
+		w = s["sans_size"] * 49
 		canvas_img(texture["sans1_still"], [x + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 	// draw sans1 (last breath)
+	s["sans1_x"] = (canvas_width / 2) - (s["sans_size"] * 24.5);
+	s["sans1_y"] = canvas_height / 40;
+	s["sans1_w"] = s["sans_size"] * 49;
 	if (s["sans1_hidden"] == false) {
-		canvas_img(texture["sans1_still"], [x + w + s["x_shake"], y + s["y_shake"], w, h]);
+		if (s["sans1_animation"] == "still") {
+			w = s["sans_size"] * 49;
+			h = s["sans_size"] * 75;
+			canvas_img(texture["sans1_still"], [s["sans1_x"], s["sans1_y"], w, h]);
+		} else if (s["sans1_animation"] == "idle") {
+			// legs
+			w = s["sans_size"] * 36;
+			h = s["sans_size"] * 20;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 55;
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			// animate body
+			if (s["sans1_animation_x_direction"] == "left") {
+				s["sans1_animation_x"] -= s["sans1_w"] / 1600;
+				if (s["sans1_animation_x"] < -s["sans1_w"] / 80) {
+					s["sans1_animation_x_direction"] = "right";
+				}
+			} else if (s["sans1_animation_x_direction"] == "right") {
+				s["sans1_animation_x"] += s["sans1_w"] / 1600;
+				if (s["sans1_animation_x"] > s["sans1_w"] / 80) {
+					s["sans1_animation_x_direction"] = "left";
+				}
+			}
+			if (s["sans1_animation_y_direction"] == "up") {
+				s["sans1_animation_y"] -= s["sans1_w"] / 800;
+				if (s["sans1_animation_y"] < -s["sans1_w"] / 80) {
+					s["sans1_animation_y_direction"] = "down";
+				}
+			} else if (s["sans1_animation_y_direction"] == "down") {
+				s["sans1_animation_y"] += s["sans1_w"] / 800;
+				if (s["sans1_animation_y"] > s["sans1_w"] / 80) {
+					s["sans1_animation_y_direction"] = "up";
+				}
+			}
+			// body
+			w = s["sans1_w"];
+			h = s["sans_size"] * 31;
+			y = s["sans_size"] * 25;
+			canvas_img(texture["sans1_torso"], [
+				s["sans1_x"] + s["sans1_animation_x"],
+				s["sans1_y"] + y + s["sans1_animation_y"],
+				w, h]);
+			// head
+			w = s["sans_size"] * 31;
+			h = s["sans_size"] * 31;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 0.5;
+			canvas_img(texture[s["sans1_head"]], [
+					s["sans1_x"] + x + s["sans1_animation_x"],
+					s["sans1_y"] + y + s["sans1_animation_x"],
+					w, h]);
+		} else if (s["sans1_animation"] == "side") {
+			// legs
+			w = s["sans_size"] * 36;
+			h = s["sans_size"] * 20;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 55;
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			// body
+			s["sans1_animation_x"] ++;
+			if (s["sans1_animation_x"] < 4) {
+				w = s["sans_size"] * 49;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 8) {
+				w = s["sans_size"] * 69;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 38) {
+				w = s["sans_size"] * 72;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 42) {
+				w = s["sans_size"] * 69;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 46) {
+				w = s["sans_size"] * 49;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] >= 46) {
+				// draw last frame
+				w = s["sans_size"] * 49;
+				h = s["sans_size"] * 33;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				// change animation
+				s["sans1_animation_x"] = 0;
+				s["sans1_animation_y"] = 0;
+				s["sans1_animation"] = "idle";
+			} 
+			// head
+			w = s["sans_size"] * 31;
+			h = s["sans_size"] * 31;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 0.5;
+			canvas_img(texture[s["sans1_head"]], [
+					s["sans1_x"] + x,
+					s["sans1_y"] + y,
+					w, h]);
+		} else if (s["sans1_animation"] == "up") {
+			// legs
+			w = s["sans_size"] * 36;
+			h = s["sans_size"] * 20;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 55;
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			// body
+			s["sans1_animation_x"] ++;
+			if (s["sans1_animation_x"] < 4) {
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 8) {
+				w = s["sans_size"] * 63;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 38) {
+				w = s["sans_size"] * 61;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 40) {
+				w = s["sans_size"] * 63;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 42) {
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] >= 42) {
+				// draw last frame
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				// change animation
+				s["sans1_animation_x"] = 0;
+				s["sans1_animation_y"] = 0;
+				s["sans1_animation"] = "idle";
+			} 
+			// head
+			w = s["sans_size"] * 31;
+			h = s["sans_size"] * 31;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 0.5;
+			canvas_img(texture[s["sans1_head"]], [
+					s["sans1_x"] + x,
+					s["sans1_y"] + y,
+					w, h]);
+		} else if (s["sans1_animation"] == "down") {
+			// legs
+			w = s["sans_size"] * 36;
+			h = s["sans_size"] * 20;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 55;
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			// body
+			s["sans1_animation_x"] ++;
+			if (s["sans1_animation_x"] < 2) {
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 4) {
+				w = s["sans_size"] * 63;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 6) {
+				w = s["sans_size"] * 61;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 10) {
+				w = s["sans_size"] * 63;
+				h = s["sans_size"] * 43;
+				y = s["sans_size"] * 15;
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] < 40) {
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+			} else if (s["sans1_animation_x"] >= 40) {
+				// draw last frame
+				w = s["sans_size"] * 56;
+				h = s["sans_size"] * 35;
+				y = s["sans_size"] * 25;
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				// change animation
+				s["sans1_animation_x"] = 0;
+				s["sans1_animation_y"] = 0;
+				s["sans1_animation"] = "idle";
+			} 
+			// head
+			w = s["sans_size"] * 31;
+			h = s["sans_size"] * 31;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 0.5;
+			canvas_img(texture[s["sans1_head"]], [
+					s["sans1_x"] + x,
+					s["sans1_y"] + y,
+					w, h]);
+		}
+		
 	}
 	// draw sans2 (slackertale)
 	if (s["sans2_hidden"] == false) {
+		w = s["sans_size"] * 49
+		h = s["sans_size"] * 75
 		canvas_img(texture["sans1_still"], [x + w * 2 + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 	// draw sans3 (sudden changes)
 	if (s["sans3_hidden"] == false) {
+		w = s["sans_size"] * 49
+		h = s["sans_size"] * 75
 		canvas_img(texture["sans1_still"], [x + w * 3 + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 }
@@ -882,6 +1129,8 @@ function reset() {
 	s["w"] = canvas_width / 35;
 	s["h"] = canvas_width / 35;
 	s["s"] = canvas_width / 250;
+	// adjust sans
+	s["sans_size"] = (canvas_width / 6.3) / 49
 	// adjust options
 	texture["opt_xm"] = canvas_width / 4
 	texture["opt_y"] = canvas_height / 1.14
