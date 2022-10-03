@@ -117,26 +117,26 @@ function load_command_animation_test() {
 			"until": "load",
 			"time": 0,
 		},
-		// {
-		// 	"name": "sans",
-		// 	"id": 0,
-		// 	"hidden": true,
-		// },
-		// {
-		// 	"name": "sans",
-		// 	"id": 1,
-		// 	"hidden": true,
-		// },
-		// {
-		// 	"name": "sans",
-		// 	"id": 2,
-		// 	"hidden": true,
-		// },
-		// {
-		// 	"name": "sans",
-		// 	"id": 3,
-		// 	"hidden": true,
-		// },
+		{
+			"name": "sans",
+			"id": 0,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 1,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 2,
+			"hidden": true,
+		},
+		{
+			"name": "sans",
+			"id": 3,
+			"hidden": true,
+		},
 		{
 			"name": "animate",
 			"preset": "title",
@@ -149,22 +149,10 @@ function load_command_animation_test() {
 			"name": "animate",
 			"preset": "box_down",
 		},
-		// {
-		// 	"name": "animate",
-		// 	"preset": "sans0_intro",
-		// },
 		{
 			"name": "animate",
-			"preset": "sans1_intro",
-		},
-		// {
-		// 	"name": "animate",
-		// 	"preset": "sans2_intro",
-		// },
-		// {
-		// 	"name": "animate",
-		// 	"preset": "sans3_intro",
-		// },
+			"preset": "sans_intro",
+		}
 	)
 }
 
@@ -177,32 +165,24 @@ function load_command_lmao() {
 			"hidden": false,
 		},
 		{
-			"name": "position",
-			"preset": true,  // use coordinates or present?
-			"preset_name": "center",
-			"x": 0,
-			"y": 0,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "down",
-			"force": 2,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
 			"name": "soul",
 			"mode": "blue",
 			"pulse": false,
 			"hidden": false,
 			"gravity": "up",
-			"force": 4,
+			"force": 10,
+		},
+		{
+			"name": "wait",
+			"until": "time",
+			"time": 10,
+		},{
+			"name": "soul",
+			"mode": "blue",
+			"pulse": false,
+			"hidden": false,
+			"gravity": "left",
+			"force": 10,
 		},
 		{
 			"name": "wait",
@@ -214,21 +194,8 @@ function load_command_lmao() {
 			"mode": "blue",
 			"pulse": false,
 			"hidden": false,
-			"gravity": "down",
-			"force": 8,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "up",
-			"force": 16,
+			"gravity": "right",
+			"force": 10,
 		},
 		{
 			"name": "wait",
@@ -241,72 +208,12 @@ function load_command_lmao() {
 			"pulse": false,
 			"hidden": false,
 			"gravity": "down",
-			"force": 32,
+			"force": 10,
 		},
 		{
 			"name": "wait",
 			"until": "time",
 			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "up",
-			"force": 64,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "down",
-			"force": 128,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "up",
-			"force": 64,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "down",
-			"force": 512,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "up",
-			"force": 99999999,
 		},
 	)
 }
@@ -365,7 +272,7 @@ function load_command_intro() {
 		// sans(es) enter animation
 		{
 			"name": "animate",
-			"preset": "sans1_intro",
+			"preset": "sans_intro",
 		},
 		{
 			"name": "wait",
@@ -373,17 +280,9 @@ function load_command_intro() {
 			"time": 150,
 		},
 		{
-			"name": "animate",
-			"preset": "sans2_intro",
-		},
-		{
 			"name": "wait",
 			"until": "time",
 			"time": 150,
-		},
-		{
-			"name": "animate",
-			"preset": "sans0_intro",
 		},
 		{
 			"name": "wait",
@@ -398,10 +297,6 @@ function load_command_intro() {
 			"name": "wait",
 			"until": "time",
 			"time": 75,
-		},
-		{
-			"name": "animate",
-			"preset": "sans3_intro",
 		},
 		// animate box down
 		{
@@ -469,26 +364,6 @@ function load_command_intro() {
 			"hidden": true,
 			"gravity": "down",
 			"force": 1,
-		},
-		{
-			"name": "sans",
-			"id": 0,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 1,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 2,
-			"hidden": true,
-		},
-		{
-			"name": "sans",
-			"id": 3,
-			"hidden": true,
 		},
 	)
 }

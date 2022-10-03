@@ -81,7 +81,7 @@ var texture = {
 }
 var audio = {
 	"impact": [],
-	"impact_len": 600,
+	"impact_len": 700,
 	"impact_channel": [0, 0, 0, 0, 0],
 	"theme0": null,
 	"theme0_len": 30000,
@@ -565,23 +565,13 @@ function manage_animation() {
 		} else if (s["animation"][i]["name"] == "box_down") {
 			percent = Math.round(s["animation"][i]["frame"] * 100)
 			con.innerHTML += `${percent}% - box_down\n`
-		} else if (s["animation"][i]["name"] == "sans0_intro") {
-				percent = Math.round(s["animation"][i]["frame"] * 100)
-				con.innerHTML += `${percent}% - sans0_intro\n`
-		} else if (s["animation"][i]["name"] == "sans1_intro") {
-			percent = Math.round(s["animation"][i]["frame"] * 50)
-			con.innerHTML += `${percent}% - sans1_intro\n`
-		} else if (s["animation"][i]["name"] == "sans2_intro") {
-			percent = Math.round(s["animation"][i]["frame"] * 100)
-			con.innerHTML += `${percent}% - sans2_intro\n`
-		} else if (s["animation"][i]["name"] == "sans3_intro") {
-			percent = Math.round(s["animation"][i]["frame"] * 100)
-			con.innerHTML += `${percent}% - sans3_intro\n`
+		} else if (s["animation"][i]["name"] == "sans_intro") {
+				percent = Math.round(s["animation"][i]["frame"] * 5.78)
+				con.innerHTML += `${percent}% - sans_intro\n`
 		}
 	}
 	// execute animations
 	for (let i = 0; i < s["animation"].length; i ++) {
-		// title fade in/out
 		if (s["animation"][i]["name"] == "title") {
 			// animate
 			s["animation"][i]["frame"] += 0.01;
@@ -640,17 +630,16 @@ function manage_animation() {
 			} else if (s["animation"][i]["frame"] > 6){
 				s["animation"].splice(i, 1)
 			}
-		// box down
 		} else if (s["animation"][i]["name"] == "box_down") {
 			// animate
-			s["animation"][i]["frame"] += 0.005
-			box["preset"] = "custom"
+			s["animation"][i]["frame"] += 0.005;
+			box["preset"] = "custom";
 			// calculate target values
-			let dist = box["bottom"] - (canvas_height / 2)
-			let w = s["w"]
-			let h = s["h"]
-			let x = (canvas_width / 2) - (w / 2)
-			let y = (canvas_height / 2) + (dist * s["animation"][i]["frame"])
+			let dist = box["bottom"] - (canvas_height / 2);
+			let w = s["w"];
+			let h = s["h"];
+			let x = (canvas_width / 2) - (w / 2);
+			let y = (canvas_height / 2) + (dist * s["animation"][i]["frame"]);
 			// apply animation
 			box["w"] = w
 			box["h"] = h
@@ -658,48 +647,67 @@ function manage_animation() {
 			box["y"] = y
 			// end animation
 			if (s["animation"][i]["frame"] > 1) {
-				s["animation"].splice(i, 1)
+				s["animation"].splice(i, 1);
 			}
-		// sans 0 (error sans) intro
-		} else if (s["animation"][i]["name"] == "sans0_intro") {
+		} else if (s["animation"][i]["name"] == "sans_intro") {
 			// animate
 			s["animation"][i]["frame"] += 0.01;
 			// draw sans
-			let w = canvas_width / 6.3
-			let h = (w * 75) / 49
-			let x = (canvas_width / 2) - (w * 2)
+			let w = s["sans_size"] * 49
+			let h = s["sans_size"] * 75
+			let sans0_x = (canvas_width / 2) - (w * 2)
+			let sans1_x = (canvas_width / 2) - w
+			let sans2_x = canvas_width / 2
+			let sans3_x = (canvas_width / 2) + w
 			let y = canvas_height / 40
-			// fade in
 			if (s["animation"][i]["frame"] < 1) {
-				canvas_img(texture["sans1_still"], [x, y, w, h], 0, s["animation"][i]["frame"]);
-			// end animation
-			} else if (s["animation"][i]["frame"] > 1) {
-				s["animation"].splice(i, 1)
-				s["sans0_hidden"] = false;
-			}
-		// sans1 (last breath) intro
-		} else if (s["animation"][i]["name"] == "sans1_intro") {
-			// animate
-			s["animation"][i]["frame"] += 0.01;
-			// draw sans
-			let w = canvas_width / 6.3
-			let h = (w * 75) / 49
-			let x0 = (canvas_width / 2) - (w / 2)
-			let x1 = (canvas_width / 2) - (w * 2)
-			let y = canvas_height / 40
-			// fade in at center of screen
-			if (s["animation"][i]["frame"] < 1) {
-				canvas_img(texture["sans1_still"], [x0 + s["x_shake"], y + s["y_shake"], w, h], 0,
-				s["animation"][i]["frame"]);
-			// move to correct position
+				// sans1 (last breath) fade in
+				canvas_img(texture["sans1_still"], [sans1_x, y, w, h], 0, s["animation"][i]["frame"]);
 			} else if (s["animation"][i]["frame"] < 2) {
-				s["animation"][i]["frame"] += 0.005;
-				let dist = (x0 - (x1 + w)) * (1 - s["animation"][i]["frame"])
-				canvas_img(texture["sans1_still"], [x0 + dist, y, w, h]);
-			// end animation
-			} else if (s["animation"][i]["frame"] > 2) {
+				// sans1 (last breath) fade out
+				canvas_img(texture["sans1_still"], [sans1_x, y, w, h], 0, 2 - s["animation"][i]["frame"]);
+				s["animation"][i]["frame"] += 0.01;
+			} else if (s["animation"][i]["frame"] < 3) {
+				// sans2 (slacker) fade in
+				canvas_img(texture["sans1_still"], [sans2_x, y, w, h], 0, s["animation"][i]["frame"] - 2);
+			} else if (s["animation"][i]["frame"] < 4) {
+				// sans2 (slacker) fade out
+				canvas_img(texture["sans1_still"], [sans2_x, y, w, h], 0, 4 - s["animation"][i]["frame"]);
+				s["animation"][i]["frame"] += 0.008;
+			} else if (s["animation"][i]["frame"] < 5) {
+				// sans0 (error) fade in
+				canvas_img(texture["sans1_still"], [sans0_x, y, w, h], 0, s["animation"][i]["frame"] - 4);
+			} else if (s["animation"][i]["frame"] < 6) {
+				// sans0 (error) fade out
+				canvas_img(texture["sans1_still"], [sans0_x, y, w, h], 0, 6 - s["animation"][i]["frame"]);
+				s["animation"][i]["frame"] += 0.02;
+			} else if (s["animation"][i]["frame"] < 7) {
+				// sans3 (sudden changes) fade in
+				canvas_img(texture["sans1_still"], [sans3_x, y, w, h], 0, s["animation"][i]["frame"] - 6);
+			} else if (s["animation"][i]["frame"] < 8) {
+				// sans3 (sudden changes) fade out
+				canvas_img(texture["sans1_still"], [sans3_x, y, w, h], 0, 8 - s["animation"][i]["frame"]);
+				s["animation"][i]["frame"] += 0.01;
+			} else if (s["animation"][i]["frame"] < 9) {
+				// all sans fade in
+				canvas_img(texture["sans1_still"], [sans0_x, y, w, h], 0, s["animation"][i]["frame"] - 8);
+				canvas_img(texture["sans1_still"], [sans1_x, y, w, h], 0, s["animation"][i]["frame"] - 8);
+				canvas_img(texture["sans1_still"], [sans2_x, y, w, h], 0, s["animation"][i]["frame"] - 8);
+				canvas_img(texture["sans1_still"], [sans3_x, y, w, h], 0, s["animation"][i]["frame"] - 8);
+			} else if (s["animation"][i]["frame"] < 17.3) {
+				// all sans
+				canvas_img(texture["sans1_still"], [sans0_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans1_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans2_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans3_x, y, w, h]);
+			} else if (s["animation"][i]["frame"] > 17.3) {
+				// draw last frame
+				canvas_img(texture["sans1_still"], [sans0_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans1_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans2_x, y, w, h]);
+				canvas_img(texture["sans1_still"], [sans3_x, y, w, h]);
+				// end animation
 				s["animation"].splice(i, 1)
-				s["sans1_hidden"] = false;
 			}
 		// sans 2 (slackertale) intro
 		} else if (s["animation"][i]["name"] == "sans2_intro") {
@@ -759,14 +767,14 @@ function manage_sans() {
 		if (s["sans1_animation"] == "still") {
 			w = s["sans_size"] * 49;
 			h = s["sans_size"] * 75;
-			canvas_img(texture["sans1_still"], [s["sans1_x"], s["sans1_y"], w, h]);
+			canvas_img(texture["sans1_still"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"], w, h]);
 		} else if (s["sans1_animation"] == "idle") {
 			// legs
 			w = s["sans_size"] * 36;
 			h = s["sans_size"] * 20;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 55;
-			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 			// animate body
 			if (s["sans1_animation_x_direction"] == "left") {
 				s["sans1_animation_x"] -= s["sans1_w"] / 1600;
@@ -795,8 +803,8 @@ function manage_sans() {
 			h = s["sans_size"] * 31;
 			y = s["sans_size"] * 25;
 			canvas_img(texture["sans1_torso"], [
-				s["sans1_x"] + s["sans1_animation_x"],
-				s["sans1_y"] + y + s["sans1_animation_y"],
+				s["sans1_x"] + s["x_shake"] + s["sans1_animation_x"],
+				s["sans1_y"] + s["y_shake"] + y + s["sans1_animation_y"],
 				w, h]);
 			// head
 			w = s["sans_size"] * 31;
@@ -804,8 +812,8 @@ function manage_sans() {
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
 			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + x + s["sans1_animation_x"],
-					s["sans1_y"] + y + s["sans1_animation_x"],
+					s["sans1_x"] + s["x_shake"] + x + s["sans1_animation_x"],
+					s["sans1_y"] + s["y_shake"] + y + s["sans1_animation_x"],
 					w, h]);
 		} else if (s["sans1_animation"] == "side") {
 			// legs
@@ -813,40 +821,40 @@ function manage_sans() {
 			h = s["sans_size"] * 20;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 55;
-			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 			// body
 			s["sans1_animation_x"] ++;
 			if (s["sans1_animation_x"] < 4) {
 				w = s["sans_size"] * 49;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 8) {
 				w = s["sans_size"] * 69;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 38) {
 				w = s["sans_size"] * 72;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh2"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 42) {
 				w = s["sans_size"] * 69;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 46) {
 				w = s["sans_size"] * 49;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] >= 46) {
 				// draw last frame
 				w = s["sans_size"] * 49;
 				h = s["sans_size"] * 33;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armh0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 				// change animation
 				s["sans1_animation_x"] = 0;
 				s["sans1_animation_y"] = 0;
@@ -858,8 +866,8 @@ function manage_sans() {
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
 			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + x,
-					s["sans1_y"] + y,
+					s["sans1_x"] + s["x_shake"] + x,
+					s["sans1_y"] + s["y_shake"] + y,
 					w, h]);
 		} else if (s["sans1_animation"] == "up") {
 			// legs
@@ -867,34 +875,34 @@ function manage_sans() {
 			h = s["sans_size"] * 20;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 55;
-			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 			// body
 			s["sans1_animation_x"] ++;
 			if (s["sans1_animation_x"] < 4) {
 				w = s["sans_size"] * 56;
 				h = s["sans_size"] * 35;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 8) {
 				w = s["sans_size"] * 63;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 38) {
 				w = s["sans_size"] * 61;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 40) {
 				w = s["sans_size"] * 63;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 42) {
 				w = s["sans_size"] * 56;
 				h = s["sans_size"] * 35;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] >= 42) {
 				// draw last frame
 				w = s["sans_size"] * 56;
@@ -911,8 +919,8 @@ function manage_sans() {
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
 			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + x,
-					s["sans1_y"] + y,
+					s["sans1_x"] + s["x_shake"] + x,
+					s["sans1_y"] + s["y_shake"] + y,
 					w, h]);
 		} else if (s["sans1_animation"] == "down") {
 			// legs
@@ -920,40 +928,40 @@ function manage_sans() {
 			h = s["sans_size"] * 20;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 55;
-			canvas_img(texture["sans1_legs"], [s["sans1_x"] + x, s["sans1_y"] + y, w, h]);
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 			// body
 			s["sans1_animation_x"] ++;
 			if (s["sans1_animation_x"] < 2) {
 				w = s["sans_size"] * 56;
 				h = s["sans_size"] * 35;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 4) {
 				w = s["sans_size"] * 63;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 6) {
 				w = s["sans_size"] * 61;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv2"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 10) {
 				w = s["sans_size"] * 63;
 				h = s["sans_size"] * 43;
 				y = s["sans_size"] * 15;
-				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv1"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] < 40) {
 				w = s["sans_size"] * 56;
 				h = s["sans_size"] * 35;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 			} else if (s["sans1_animation_x"] >= 40) {
 				// draw last frame
 				w = s["sans_size"] * 56;
 				h = s["sans_size"] * 35;
 				y = s["sans_size"] * 25;
-				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"], s["sans1_y"] + y, w, h]);
+				canvas_img(texture["sans1_torso_armv0"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"] + y, w, h]);
 				// change animation
 				s["sans1_animation_x"] = 0;
 				s["sans1_animation_y"] = 0;
@@ -965,8 +973,8 @@ function manage_sans() {
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
 			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + x,
-					s["sans1_y"] + y,
+					s["sans1_x"] + s["x_shake"] + x,
+					s["sans1_y"] + s["y_shake"] + y,
 					w, h]);
 		}
 		
