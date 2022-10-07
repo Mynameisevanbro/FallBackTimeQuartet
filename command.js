@@ -14,28 +14,28 @@ function load_command_test() {
 			"id": 0,
 			"hidden": true,
 			"animation": "idle",
-			"head": "sans1_head_eyeless0"
+			"head": "sans1_head"
 		},
 		{
 			"name": "sans",
 			"id": 1,
 			"hidden": false,
 			"animation": "idle",
-			"head": "sans1_head_eyeless0"
+			"head": "sans1_head"
 		},
 		{
 			"name": "sans",
 			"id": 2,
 			"hidden": true,
 			"animation": "idle",
-			"head": "sans1_head_eyeless0"
+			"head": "sans1_head"
 		},
 		{
 			"name": "sans",
 			"id": 3,
 			"hidden": true,
 			"animation": "idle",
-			"head": "sans1_head_eyeless0"
+			"head": "sans1_head"
 		},
 		{
 			"name": "box",
@@ -54,45 +54,6 @@ function load_command_test() {
 			"mode": "blue",
 			"pulse": false,
 			"hidden": false,
-			"gravity": "left",
-			"force": 8,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 100,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "right",
-			"force": 8,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 100,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "up",
-			"force": 8,
-		},
-		{
-			"name": "wait",
-			"until": "time",
-			"time": 100,
-		},
-		{
-			"name": "soul",
-			"mode": "blue",
-			"pulse": false,
-			"hidden": false,
 			"gravity": "down",
 			"force": 8,
 		},
@@ -100,6 +61,10 @@ function load_command_test() {
 			"name": "box",
 			"preset": "rectangle",
 			"hidden": false,
+		},
+		{
+			"name": "attack_bone",
+			"preset": "test",
 			"hidden": false,
 		},
 	)

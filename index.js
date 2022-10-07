@@ -24,6 +24,8 @@ var s = {
 	"lock": false,  // can move?
 	// (all) sans
 	"sans_size": 1,  // number multiplied by original file size
+	"sans_formation": 0,  // positions: 0-3 = single; 4 = all
+	"sans_hidden": [1, 1, 1, 1],  // 0 = hidden; 1 = shown (in order from left to right)
 	// error sans
 	"sans0_hidden": true,  
 	// last breath
@@ -37,10 +39,8 @@ var s = {
 	"sans1_animation_y": 0,
 	"sans1_animation_y_direction": "up",
 	"sans1_head": "sans1_head",
-	// slackertale sans
-	"sans2_hidden": true,
-	// sudden changes sans
-	"sans3_hidden": true,
+	// attacks
+	"sans1_bone": [],
 	// controls
 	"left": false,
 	"left_enabled": false,
@@ -295,10 +295,13 @@ function manage_command() {
 			con.innerHTML += `animate.${command[i]["preset"]}\n`
 		}
 		if (command[i]["name"] == "sans") {
-			con.innerHTML += `sans.id${command[i]["id"]}\n`
+			con.innerHTML += `sans.id${command[i]["id"]}.${command[i]["hidden"]}\n`
 		}
 		if (command[i]["name"] == "option") {
 			con.innerHTML += `option.${command[i]["hidden"]}\n`
+		}
+		if (command[i]["name"] == "attack_bone") {
+			con.innerHTML += `bone attack\n`
 		}
 		// prevent lag by limiting number of commands shown
 		if (i >= 9) {
@@ -387,14 +390,35 @@ function manage_command() {
 				// finish task
 				command.shift();
 			} else if (command[0]["name"] == "sans") {
-				// apply values
-				s[`sans${command[0]["id"]}_hidden`] = command[0]["hidden"];
+				// hidden?
+				let output = 0;
+				if (command[0]["hidden"]) {
+					output = 1;
+				}
+				s["sans_hidden"][command[0]["id"]] = output;
+				// apply head texture
+				s[`sans${command[0]["id"]}_head`] = command[0]["head"];
 				// finish task
 				command.shift();
 			}
 			else if (command[0]["name"] == "option") {
 				// apply values
 				texture["opt_hidden"] = command[0]["hidden"];
+				// finish task
+				command.shift();
+			}
+			else if (command[0]["name"] == "attack_bone") {
+				// add preset bones
+				if (command[0]["preset"] == "test") {
+					obj = {
+						"x": canvas_width / 2,
+						"y": box["bottom"] - box["h"],
+						"h": box["h"],
+						"vx": 0.5,  // velocity x
+						"vy": 0,  // velocity y
+					}
+					s["sans1_bone"].push(obj)
+				}
 				// finish task
 				command.shift();
 			}
@@ -754,20 +778,43 @@ function manage_sans() {
 	let h = 0;
 	let x = (canvas_width / 2) - (w * 2);
 	let y = canvas_height / 40;
+	// formation
+	if (s["sans_formation"] == 0) {
+		s["sans1_x"] = (canvas_width / 2) - (s["sans_size"] * 24.5);
+		s["sans1_y"] = canvas_height / 40;
+		s["sans1_w"] = s["sans_size"] * 49;
+	}
 	// sans0 (error)
-	if (s["sans0_hidden"] == false) {
+	if (s["sans_hidden"][0] == 0) {
 		w = s["sans_size"] * 49
 		canvas_img(texture["sans1_still"], [x + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 	// draw sans1 (last breath)
-	s["sans1_x"] = (canvas_width / 2) - (s["sans_size"] * 24.5);
-	s["sans1_y"] = canvas_height / 40;
-	s["sans1_w"] = s["sans_size"] * 49;
-	if (s["sans1_hidden"] == false) {
+	if (s["sans_hidden"][1] == 0) {
 		if (s["sans1_animation"] == "still") {
-			w = s["sans_size"] * 49;
-			h = s["sans_size"] * 75;
-			canvas_img(texture["sans1_still"], [s["sans1_x"] + s["x_shake"], s["sans1_y"] + s["y_shake"], w, h]);
+			// legs
+			w = s["sans_size"] * 36;
+			h = s["sans_size"] * 20;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 55;
+			canvas_img(texture["sans1_legs"], [s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
+			// body
+			w = s["sans1_w"];
+			h = s["sans_size"] * 31;
+			y = s["sans_size"] * 25;
+			canvas_img(texture["sans1_torso"], [
+				s["sans1_x"] + s["x_shake"] + s["sans1_animation_x"],
+				s["sans1_y"] + s["y_shake"] + y + s["sans1_animation_y"],
+				w, h]);
+			// head
+			w = s["sans_size"] * 31;
+			h = s["sans_size"] * 31;
+			x = (s["sans1_w"] / 2) - (w / 2);
+			y = s["sans_size"] * 0.5;
+			canvas_img(texture[s["sans1_head"]], [
+					s["sans1_x"] + s["x_shake"] + x + s["sans1_animation_x"],
+					s["sans1_y"] + s["y_shake"] + y + s["sans1_animation_x"],
+					w, h]);
 		} else if (s["sans1_animation"] == "idle") {
 			// legs
 			w = s["sans_size"] * 36;
@@ -914,14 +961,21 @@ function manage_sans() {
 				s["sans1_animation"] = "idle";
 			} 
 			// head
+			let head;
+			let stage = s["sans1_animation_x"]
+			while (stage > 20) {
+				stage -= 20
+			}
+			if (stage >= 10) {
+				head = texture["sans1_head_blue"]
+			} else {
+				head = texture["sans1_head_yellow"]
+			}
 			w = s["sans_size"] * 31;
 			h = s["sans_size"] * 31;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
-			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + s["x_shake"] + x,
-					s["sans1_y"] + s["y_shake"] + y,
-					w, h]);
+			canvas_img(head, [ s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 		} else if (s["sans1_animation"] == "down") {
 			// legs
 			w = s["sans_size"] * 36;
@@ -972,21 +1026,28 @@ function manage_sans() {
 			h = s["sans_size"] * 31;
 			x = (s["sans1_w"] / 2) - (w / 2);
 			y = s["sans_size"] * 0.5;
-			canvas_img(texture[s["sans1_head"]], [
-					s["sans1_x"] + s["x_shake"] + x,
-					s["sans1_y"] + s["y_shake"] + y,
-					w, h]);
+			let head;
+			let stage = s["sans1_animation_x"]
+			while (stage > 20) {
+				stage -= 20
+			}
+			if (stage >= 10) {
+				head = texture["sans1_head_blue"]
+			} else {
+				head = texture["sans1_head_yellow"]
+			}
+			canvas_img(head, [ s["sans1_x"] + s["x_shake"] + x, s["sans1_y"] + s["y_shake"] + y, w, h]);
 		}
 		
 	}
 	// draw sans2 (slackertale)
-	if (s["sans2_hidden"] == false) {
+	if (s["sans_hidden"][2] == 0) {
 		w = s["sans_size"] * 49
 		h = s["sans_size"] * 75
 		canvas_img(texture["sans1_still"], [x + w * 2 + s["x_shake"], y + s["y_shake"], w, h]);
 	}
 	// draw sans3 (sudden changes)
-	if (s["sans3_hidden"] == false) {
+	if (s["sans_hidden"][3] == 0) {
 		w = s["sans_size"] * 49
 		h = s["sans_size"] * 75
 		canvas_img(texture["sans1_still"], [x + w * 3 + s["x_shake"], y + s["y_shake"], w, h]);
@@ -994,12 +1055,35 @@ function manage_sans() {
 }
 
 
+function manage_attack() {
+	for (let i = 0;i < s["sans1_bone"].length; i ++) {
+		let bone = s["sans1_bone"][i]
+		// draw bone
+		canvas_rect([bone["x"], bone["y"], canvas_width / 100, bone["h"]], "white");
+		// direction
+		bone["x"] += bone["vx"];
+		bone["y"] += bone["vy"];
+	}
+}
+
+
 // main loop
 function run() {
-	canvas_rect([0, 0, canvas_width, canvas_height], "black");
+	// clear box
+	canvas_rect([box["x"], box["y"], box["w"], box["h"]], "black");
+	// manage attacks
+	// manage_attack();
+	// clear background (excluding box)
+	canvas_rect([0, 0, canvas_width, box["bottom"] - box["h"]], "black");
+	canvas_rect([0, box["bottom"] - box["h"], (canvas_width - box["w"]) / 2, box["h"]], "black");
+	canvas_rect([canvas_width - ((canvas_width - box["w"]) / 2), box["bottom"] - box["h"],
+		(canvas_width - box["w"]) / 2, box["h"]], "black");
+	canvas_rect([0, box["bottom"], canvas_width, canvas_height - box["bottom"]], "black");
 	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
-	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "left");
+	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "black");
+	// test
+	manage_attack();
 	// draw sans
 	manage_sans();
 	// draw options
