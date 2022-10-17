@@ -51,7 +51,7 @@ function load_command_test() {
 		},
 		{
 			"name": "soul",
-			"mode": "blue",
+			"mode": "red",
 			"pulse": false,
 			"hidden": false,
 			"gravity": "down",

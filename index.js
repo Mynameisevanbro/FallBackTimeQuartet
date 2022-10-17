@@ -69,6 +69,7 @@ var box = {
 	"h": 0,
 	"line_w" : 0,
 	"hlw": 0,  // half line width
+	"c": "white",
 }
 var texture = {
 	// options data
@@ -204,14 +205,18 @@ function canvas_img(image, rect, angle=0, opacity=1) {
 
 // game functions
 function manage_box() {
-	// draw box
-	if (box["hidden"] == false) {
-		box["hlw"] = box["line_w"] / 2  // half line width
-		canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + s["y_shake"], box["line_w"], box["h"]], "white");
-		canvas_rect([box["x"] - box["hlw"] + box["line_w"] + s["x_shake"], box["y"] - box["hlw"] + s["y_shake"], box["w"], box["line_w"]], "white");
-		canvas_rect([box["x"] - box["hlw"] + box["w"] + s["x_shake"], box["y"] - box["hlw"] + box["line_w"] + s["y_shake"], box["line_w"], box["h"]], "white");
-		canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + box["h"] + s["y_shake"], box["w"], box["line_w"]], "white");
+	// box color
+	if (box["hidden"]) {
+		box["c"] = "black";
+	} else {
+		box["c"] = "white";
 	}
+	// draw box
+	box["hlw"] = box["line_w"] / 2  // half line width
+	canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + s["y_shake"], box["line_w"], box["h"]], box["c"]);
+	canvas_rect([box["x"] - box["hlw"] + box["line_w"] + s["x_shake"], box["y"] - box["hlw"] + s["y_shake"], box["w"], box["line_w"]], box["c"]);
+	canvas_rect([box["x"] - box["hlw"] + box["w"] + s["x_shake"], box["y"] - box["hlw"] + box["line_w"] + s["y_shake"], box["line_w"], box["h"]], box["c"]);
+	canvas_rect([box["x"] - box["hlw"] + s["x_shake"], box["y"] - box["hlw"] + box["h"] + s["y_shake"], box["w"], box["line_w"]], box["c"]);
 	// update dimensions
 	let w_tar = box["w"]
 	let h_tar = box["h"]
@@ -660,15 +665,15 @@ function manage_animation() {
 			box["preset"] = "custom";
 			// calculate target values
 			let dist = box["bottom"] - (canvas_height / 2);
-			let w = s["w"];
-			let h = s["h"];
+			let w = s["w"] + s["w"] / 5;
+			let h = s["h"] + s["w"] / 5;
 			let x = (canvas_width / 2) - (w / 2);
 			let y = (canvas_height / 2) + (dist * s["animation"][i]["frame"]);
 			// apply animation
-			box["w"] = w
-			box["h"] = h
-			box["x"] = x
-			box["y"] = y
+			box["w"] = w;
+			box["h"] = h;
+			box["x"] = x;
+			box["y"] = y;
 			// end animation
 			if (s["animation"][i]["frame"] > 1) {
 				s["animation"].splice(i, 1);
@@ -1074,11 +1079,11 @@ function run() {
 	// manage attacks
 	// manage_attack();
 	// clear background (excluding box)
-	canvas_rect([0, 0, canvas_width, box["bottom"] - box["h"]], "black");
-	canvas_rect([0, box["bottom"] - box["h"], (canvas_width - box["w"]) / 2, box["h"]], "black");
-	canvas_rect([canvas_width - ((canvas_width - box["w"]) / 2), box["bottom"] - box["h"],
-		(canvas_width - box["w"]) / 2, box["h"]], "black");
-	canvas_rect([0, box["bottom"], canvas_width, canvas_height - box["bottom"]], "black");
+	canvas_rect([0, 0, canvas_width, box["y"]], "black");
+	canvas_rect([0, box["y"], (canvas_width - box["w"]) / 2, box["h"]], "black");
+	canvas_rect([canvas_width - ((canvas_width - box["w"]) / 2), box["y"], (canvas_width - box["w"]) / 2, box["h"]], "black");
+	canvas_rect([0, box["y"] + box["h"], canvas_width, canvas_height - (box["y"] + box["h"])], "black");
+	// information
 	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "black");
@@ -1097,6 +1102,8 @@ function run() {
 	canvas_img(texture["mercy0"],
 		[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
 	}
+	// box
+	manage_box();
 	// draw soul pulse
 	if (s["hidden"] == false) {
 		if (s["pulse"]) {
@@ -1190,8 +1197,6 @@ function run() {
 			s["force"] = 1
 		}
 	}
-	// box
-	manage_box();
 	// manage FPS
 	manage_fps();
 	// loop?
@@ -1253,6 +1258,8 @@ function reset() {
 		"sans1_torso_armv1",
 		"sans1_torso_armv2",
 		"sans1_torso_shrug",
+		// attacks
+		"sans1_attack_bone",
 		// soul
 		"soul_red",
 		"soul_blue",
