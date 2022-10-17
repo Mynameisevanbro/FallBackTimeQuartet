@@ -38,11 +38,6 @@ function load_command_test() {
 			"head": "sans1_head"
 		},
 		{
-			"name": "box",
-			"preset": "square",
-			"hidden": false,
-		},
-		{
 			"name": "position",
 			"preset": true,  // use coordinates or present?
 			"preset_name": "center",

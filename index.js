@@ -16,6 +16,7 @@ var s = {
 	"s": 0,  // speed
 	"a": 360,  // angle
 	"m": "red",  // mode
+	"hp": 92, // health
 	"hidden": false,
 	"pulse": false,
 	"pulse_m": 0,  // magnitude
@@ -416,8 +417,9 @@ function manage_command() {
 				// add preset bones
 				if (command[0]["preset"] == "test") {
 					obj = {
-						"x": canvas_width / 2,
-						"y": box["bottom"] - box["h"],
+						"x": box["x"],
+						"y": box["y"],
+						"w": canvas_width / 90,
 						"h": box["h"],
 						"vx": 0.5,  // velocity x
 						"vy": 0,  // velocity y
@@ -1061,13 +1063,21 @@ function manage_sans() {
 
 
 function manage_attack() {
-	for (let i = 0;i < s["sans1_bone"].length; i ++) {
+	for (let i = 0; i < s["sans1_bone"].length; i ++) {
 		let bone = s["sans1_bone"][i]
 		// draw bone
-		canvas_rect([bone["x"], bone["y"], canvas_width / 100, bone["h"]], "white");
+		canvas_rect([bone["x"] + s["x_shake"], bone["y"] + (bone["w"] * 1.4) + s["y_shake"], bone["w"], bone["h"] - (bone["w"] * 2.6)], "white");
+		canvas_img(texture["sans1_attack_bone"],
+			[bone["x"] - (bone["w"] * 0.25) + s["x_shake"], bone["y"] + (bone["w"] * 0.4) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1])
+		canvas_img(texture["sans1_attack_bone"],
+			[bone["x"] - (bone["w"] * 0.25) + s["x_shake"], bone["y"] - (bone["w"] * 1.3) + bone["h"] + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], 180)
 		// direction
 		bone["x"] += bone["vx"];
 		bone["y"] += bone["vy"];
+		// remove bone
+		if (bone["x"] > canvas_width) {
+			s["sans1_bone"].splice(i, 1);
+		}
 	}
 }
 
@@ -1077,7 +1087,7 @@ function run() {
 	// clear box
 	canvas_rect([box["x"], box["y"], box["w"], box["h"]], "black");
 	// manage attacks
-	// manage_attack();
+	manage_attack();
 	// clear background (excluding box)
 	canvas_rect([0, 0, canvas_width, box["y"]], "black");
 	canvas_rect([0, box["y"], (canvas_width - box["w"]) / 2, box["h"]], "black");
@@ -1087,20 +1097,23 @@ function run() {
 	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
 	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
 	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "black");
-	// test
-	manage_attack();
 	// draw sans
 	manage_sans();
 	// draw options
 	if (texture["opt_hidden"] == false) {
+		// draw health bar
+		hp_w = canvas_width / 5
+		hp_x = (canvas_width / 2) - (hp_w / 2)
+		canvas_rect([hp_x, canvas_height * 0.8, hp_w, canvas_height / 18], "red")
+		// draw options
 		canvas_img(texture["fight0"],
-		[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["act0"],
-		[texture["opt_xm"] + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["item0"], 
-		[texture["opt_xm"] * 2 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
-	canvas_img(texture["mercy0"],
-		[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+			[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
+		canvas_img(texture["act0"],
+			[texture["opt_xm"] + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+		canvas_img(texture["item0"], 
+			[texture["opt_xm"] * 2 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
+		canvas_img(texture["mercy0"],
+			[texture["opt_xm"] * 3 + texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"], texture["opt_w"], texture["opt_h"]])
 	}
 	// box
 	manage_box();
