@@ -438,6 +438,7 @@ function manage_command() {
 						"h": box["h"],
 						"vx": 0.5,  // velocity x
 						"vy": 0,  // velocity y
+						"va": 1,  // velocity a
 					}
 					s["sans1_bone"].push(obj)
 				} else if (command[0]["preset"] == "intro") {
@@ -445,45 +446,49 @@ function manage_command() {
 						// left
 						obj = {
 							"x": box["x"] + (box["w"] / 9),
-							"y": box["y"] - (i * 60),
+							"y": box["y"] - (i * canvas_width / 15),
 							"a": 0,
 							"w": canvas_width / 90,
 							"h": box["h"] / 6,
 							"vx": 0,  // velocity x
 							"vy": s["s"],  // velocity y
+							"va": 0,  // velocity a
 						}
 						s["sans1_bone"].push(obj)
 						// right
 						obj = {
 							"x": box["x"] + box["w"] - (box["h"] / 9),
-							"y": box["y"] + box["h"] + (i * 60),
+							"y": box["y"] + box["h"] + (i * canvas_width / 15),
 							"a": 0,
 							"w": canvas_width / 90,
 							"h": box["h"] / 6,
 							"vx": 0,  // velocity x
 							"vy": -s["s"],  // velocity y
+							"va": 0,  // velocity a
 						}
 						s["sans1_bone"].push(obj)
 						// top
 						obj = {
-							"x": box["x"] + box["h"] + (i * 60),
+							"x": box["x"] + box["h"] + (i * canvas_width / 15),
 							"y": box["y"] + (box["h"] / 9),
 							"a": 90,
 							"w": canvas_width / 90,
 							"h": box["h"] / 6,
 							"vx": -s["s"],  // velocity x
 							"vy": 0,  // velocity y
+							"va": 0,  // velocity a
 						}
 						s["sans1_bone"].push(obj)
 						// bottom
 						obj = {
-							"x": box["x"] - (i * 60),
+							"x": box["x"] - (i * canvas_width / 15),
 							"y": box["y"] + box["h"] - (box["h"] / 9),
 							"a": 90,
 							"w": canvas_width / 90,
 							"h": box["h"] / 6,
 							"vx": s["s"],  // velocity x
 							"vy": 0,  // velocity y
+							"va": 0,  // velocity a
 						}
 						s["sans1_bone"].push(obj)
 					}
@@ -1123,25 +1128,68 @@ function manage_sans() {
 	}
 }
 
+
+function collision_line(line1, line2) {
+	// define line 1
+	let l1x1 = line1[0];
+	let l1y1 = line1[1];
+	let l1x2 = line1[2];
+	let l1y2 = line1[3];
+	// slove for m & b
+	let l1m = (l1y2 - l1y1) / (l1x2 - l1x1);
+	let l1b = l1y1 - (l1m * l1x1);
+	// define line 2
+	let l2x1 = line2[0];
+	let l2y1 = line2[1];
+	let l2x2 = line2[2];
+	let l2y2 = line2[3];
+	// slove for m & b
+	let l2m = (l2y2 - l2y1) / (l2x2 - l2x1);
+	let l2b = l2y1 - (l2m * l2x1);
+	// solve for collision
+	let x = (l1b - l2b) / (l2m - l1m);
+	let y = (l1m * x) + l1b;
+	// return
+	return ([x, y]);
+}
+
+
+
 function manage_attack() {
+	// sans 1 - bone
 	for (let i = 0; i < s["sans1_bone"].length; i ++) {
 		let bone = s["sans1_bone"][i]
 		// draw bone
 		const canvas = document.getElementById("canvas");
 		const ctx = canvas.getContext("2d");
-		let x = Math.cos(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2)
-		let y = Math.sin(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2)	
+		let x = Math.cos(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2);
+		let y = Math.sin(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2)	;
 		canvas_line(bone["x"] + s["x_shake"], bone["y"] + s["y_shake"], bone["x"] + x + s["x_shake"], bone["y"] + y + s["y_shake"], "white", bone["w"])
 		canvas_img(texture["sans1_attack_bone"],
 			[bone["x"] + x - ((bone["w"] * 1.55) / 2) + s["x_shake"], bone["y"] + y - (bone["w"] / 2) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], bone["a"] + 90)
-		x = Math.cos(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2)
-		y = Math.sin(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2)
+		x = Math.cos(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2);
+		y = Math.sin(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2);
 		canvas_line(bone["x"] + s["x_shake"], bone["y"] + s["y_shake"], bone["x"] + x + s["x_shake"], bone["y"] + y + s["y_shake"], "white", bone["w"])
 		canvas_img(texture["sans1_attack_bone"],
 			[bone["x"] + x - ((bone["w"] * 1.55) / 2) + s["x_shake"], bone["y"] + y - (bone["w"] / 2) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], bone["a"] - 90)
 		// direction
 		bone["x"] += bone["vx"];
 		bone["y"] += bone["vy"];
+		bone["a"] += bone["va"];
+
+		// soul collision
+		// canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
+		// canvas_line(s["x"], s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
+		canvas_line(s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
+		// canvas_line(s["x"] + s["w"], s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
+		// canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
+
+		canvas_line(bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y, "red", 2)
+		// bone["x"] = canvas_width / 2
+		// equation of bone line
+		// let ans = collision_line([s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
+		// canvas_line(ans[0], ans[1], ans[0] + 5, ans[1] + 5, "cyan", 10)
+
 		// remove bone
 		if (bone["vx"] > 0) {
 			if (bone["x"] > canvas_width) {
@@ -1170,6 +1218,10 @@ function manage_attack() {
 function run() {
 	// clear box
 	canvas_rect([box["x"], box["y"], box["w"], box["h"]], "black");
+	// draw soul
+	if (s["hidden"] == false) {
+		canvas_img(texture[`soul_${s["m"]}`], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
+	}
 	// manage attacks
 	manage_attack();
 	// clear background (excluding box)
@@ -1213,10 +1265,6 @@ function run() {
 			canvas_img(texture[`soul_${s["m"]}`],
 				[s["x"] - o + s["x_shake"], s["y"] - o + s["y_shake"], s["pulse_m"] , s["pulse_m"] ], s["a"], opacity)
 		}
-	}
-	// draw soul
-	if (s["hidden"] == false) {
-		canvas_img(texture[`soul_${s["m"]}`], [s["x"] + s["x_shake"], s["y"] + s["y_shake"], s["w"], s["h"]], s["a"])
 	}
 	// screen shake
 	if (s["x_shake"] > 0) {

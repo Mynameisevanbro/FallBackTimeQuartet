@@ -169,7 +169,7 @@ function load_command_lmao() {
 		},
 		{
 			"name": "soul",
-			"mode": "blue",
+			"mode": "red",
 			"pulse": false,
 			"hidden": false,
 			"gravity": "down",
@@ -179,14 +179,6 @@ function load_command_lmao() {
 			"name": "wait",
 			"until": "time",
 			"time": 10,
-		},
-		{
-			"name": "soul",
-			"mode": "red",
-			"pulse": false,
-			"hidden": false,
-			"gravity": "down",
-			"force": 10,
 		},
 		{
 			"name": "position",
