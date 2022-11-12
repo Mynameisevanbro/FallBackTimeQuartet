@@ -58,6 +58,11 @@ function load_command_test() {
 			"hidden": false,
 		},
 		{
+			"name": "wait",
+			"until": "load",
+			"time": 100,
+		},
+		{
 			"name": "attack_bone",
 			"preset": "test",
 			"hidden": false,
@@ -174,6 +179,26 @@ function load_command_lmao() {
 			"name": "wait",
 			"until": "time",
 			"time": 10,
+		},
+		{
+			"name": "soul",
+			"mode": "red",
+			"pulse": false,
+			"hidden": false,
+			"gravity": "down",
+			"force": 10,
+		},
+		{
+			"name": "position",
+			"preset": true,  // use coordinates or present?
+			"preset_name": "center",
+			"x": 0,
+			"y": 0,
+		},
+		{
+			"name": "attack_bone",
+			"preset": "intro",
+			"hidden": false,
 		},
 	)
 }

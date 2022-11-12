@@ -204,6 +204,20 @@ function canvas_img(image, rect, angle=0, opacity=1) {
 }
 
 
+function canvas_line(x1, y1, x2, y2, color, width=1) {
+	// define canvas
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+	// draw line
+	ctx.strokeStyle = color
+	ctx.beginPath(); 
+	ctx.moveTo(x1, y1);
+	ctx.lineWidth = width;
+	ctx.lineTo(x2, y2);
+	ctx.stroke();	
+}
+
+
 // game functions
 function manage_box() {
 	// box color
@@ -418,13 +432,61 @@ function manage_command() {
 				if (command[0]["preset"] == "test") {
 					obj = {
 						"x": box["x"],
-						"y": box["y"],
+						"y": box["y"] + (box["h"] / 2),
+						"a": 0,
 						"w": canvas_width / 90,
 						"h": box["h"],
 						"vx": 0.5,  // velocity x
 						"vy": 0,  // velocity y
 					}
 					s["sans1_bone"].push(obj)
+				} else if (command[0]["preset"] == "intro") {
+					for (let i = 0; i < 40; i ++) {
+						// left
+						obj = {
+							"x": box["x"] + (box["w"] / 9),
+							"y": box["y"] - (i * 60),
+							"a": 0,
+							"w": canvas_width / 90,
+							"h": box["h"] / 6,
+							"vx": 0,  // velocity x
+							"vy": s["s"],  // velocity y
+						}
+						s["sans1_bone"].push(obj)
+						// right
+						obj = {
+							"x": box["x"] + box["w"] - (box["h"] / 9),
+							"y": box["y"] + box["h"] + (i * 60),
+							"a": 0,
+							"w": canvas_width / 90,
+							"h": box["h"] / 6,
+							"vx": 0,  // velocity x
+							"vy": -s["s"],  // velocity y
+						}
+						s["sans1_bone"].push(obj)
+						// top
+						obj = {
+							"x": box["x"] + box["h"] + (i * 60),
+							"y": box["y"] + (box["h"] / 9),
+							"a": 90,
+							"w": canvas_width / 90,
+							"h": box["h"] / 6,
+							"vx": -s["s"],  // velocity x
+							"vy": 0,  // velocity y
+						}
+						s["sans1_bone"].push(obj)
+						// bottom
+						obj = {
+							"x": box["x"] - (i * 60),
+							"y": box["y"] + box["h"] - (box["h"] / 9),
+							"a": 90,
+							"w": canvas_width / 90,
+							"h": box["h"] / 6,
+							"vx": s["s"],  // velocity x
+							"vy": 0,  // velocity y
+						}
+						s["sans1_bone"].push(obj)
+					}
 				}
 				// finish task
 				command.shift();
@@ -1061,23 +1123,45 @@ function manage_sans() {
 	}
 }
 
-
 function manage_attack() {
 	for (let i = 0; i < s["sans1_bone"].length; i ++) {
 		let bone = s["sans1_bone"][i]
 		// draw bone
-		canvas_rect([bone["x"] + s["x_shake"], bone["y"] + (bone["w"] * 1.4) + s["y_shake"], bone["w"], bone["h"] - (bone["w"] * 2.6)], "white");
+		const canvas = document.getElementById("canvas");
+		const ctx = canvas.getContext("2d");
+		let x = Math.cos(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2)
+		let y = Math.sin(((Math.PI / 180) * bone["a"])) * (bone["h"] / 2)	
+		canvas_line(bone["x"] + s["x_shake"], bone["y"] + s["y_shake"], bone["x"] + x + s["x_shake"], bone["y"] + y + s["y_shake"], "white", bone["w"])
 		canvas_img(texture["sans1_attack_bone"],
-			[bone["x"] - (bone["w"] * 0.25) + s["x_shake"], bone["y"] + (bone["w"] * 0.4) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1])
+			[bone["x"] + x - ((bone["w"] * 1.55) / 2) + s["x_shake"], bone["y"] + y - (bone["w"] / 2) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], bone["a"] + 90)
+		x = Math.cos(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2)
+		y = Math.sin(((Math.PI / 180) * (bone["a"] + 180))) * (bone["h"] / 2)
+		canvas_line(bone["x"] + s["x_shake"], bone["y"] + s["y_shake"], bone["x"] + x + s["x_shake"], bone["y"] + y + s["y_shake"], "white", bone["w"])
 		canvas_img(texture["sans1_attack_bone"],
-			[bone["x"] - (bone["w"] * 0.25) + s["x_shake"], bone["y"] - (bone["w"] * 1.3) + bone["h"] + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], 180)
+			[bone["x"] + x - ((bone["w"] * 1.55) / 2) + s["x_shake"], bone["y"] + y - (bone["w"] / 2) + s["y_shake"], bone["w"] * 1.55, bone["w"] * 1], bone["a"] - 90)
 		// direction
 		bone["x"] += bone["vx"];
 		bone["y"] += bone["vy"];
 		// remove bone
-		if (bone["x"] > canvas_width) {
-			s["sans1_bone"].splice(i, 1);
+		if (bone["vx"] > 0) {
+			if (bone["x"] > canvas_width) {
+				s["sans1_bone"].splice(i, 1);
+			}
+		} else if (bone["vx"] < 0) {
+			if (bone["x"] < 0) {
+				s["sans1_bone"].splice(i, 1);
+			}
 		}
+		if (bone["vy"] > 0) {
+			if (bone["y"] > canvas_height) {
+				s["sans1_bone"].splice(i, 1);
+			}
+		} else if (bone["vy"] < 0) {
+			if (bone["y"] < 0) {
+				s["sans1_bone"].splice(i, 1);
+			}
+		}
+		
 	}
 }
 
