@@ -1,6 +1,7 @@
 // varables
 var canvas_width;
 var canvas_height;
+var dev = true;
 var s = {
 	// main + screen
 	"run": false,
@@ -174,13 +175,18 @@ function canvas_text(text, pos, size, color, font, alignment="center", opacity=1
 }
 
 
-function canvas_rect(rect, color) {
+function canvas_rect(rect, color, stroke=0) {
 	// define canvas
 	const canvas = document.getElementById("canvas");
 	const ctx = canvas.getContext("2d");
 	// draw title
 	ctx.fillStyle = color;
-	ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+	ctx.strokeStyle = color;
+	if (stroke == 0) {
+		ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+	} else {
+		ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+	}
 }
 
 
@@ -1146,13 +1152,73 @@ function collision_line(line1, line2) {
 	// slove for m & b
 	let l2m = (l2y2 - l2y1) / (l2x2 - l2x1);
 	let l2b = l2y1 - (l2m * l2x1);
-	// solve for collision
+	// solve for intersection
 	let x = (l1b - l2b) / (l2m - l1m);
 	let y = (l1m * x) + l1b;
+	// solve for collision
+	let l1d = Math.sqrt(Math.pow(l1x1 - l1x2, 2) + Math.pow(l1y1 - l1y2, 2));
+	let l1da = Math.sqrt(Math.pow(l1x1 - x, 2) + Math.pow(l1y1 - y, 2));
+	let l1db = Math.sqrt(Math.pow(l1x2 - x, 2) + Math.pow(l1y2 - y, 2));
+	let l2d = Math.sqrt(Math.pow(l2x1 - l2x2, 2) + Math.pow(l2y1 - l2y2, 2));
+	let l2da = Math.sqrt(Math.pow(l2x1 - x, 2) + Math.pow(l2y1 - y, 2));
+	let l2db = Math.sqrt(Math.pow(l2x2 - x, 2) + Math.pow(l2y2 - y, 2));
 	// return
-	return ([x, y]);
+	if ((l1da + l1db) == l1d && (l2da + l2db) == l2d) {
+		if (dev) {
+			canvas_rect([x - 4, y - 4, 8, 8], "black");
+			canvas_rect([x - 3, y - 3, 6, 6], "yellow");
+		}
+		
+		return 1
+	} else {
+		return 0
+	}
 }
 
+
+function collision_box(rect1, rect2) {
+	let b1x = rect1[0]
+	let b1y = rect1[1]
+	let b1w = rect1[3]
+	let b1h = rect1[4]
+
+	let b2x = rect2[0]
+	let b2y = rect2[1]
+	let b2w = rect2[3]
+	let b2h = rect2[4]
+
+	let cx = false
+	if (b1x >= b2x && b1x <= b2x + b2w) {
+		cx = true
+	}
+	if (b2x >= b1x && b2x <= b1x + b1w) {
+		cx = true
+	}
+	if (b1x + b1w >= b2x && b1x <= b2x + b2w) {
+		cx = true
+	}
+	if (b2x + b1w >= b1x && b2x <= b1x + b1w) {
+		cx = true
+	}
+	let cy = false
+	if (b1y >= b2y && b1y <= b2y + b2h) {
+		cy = true
+	}
+	if (b2y >= b1y && b2y <= b1y + b1h) {
+		cy = true
+	}
+	if (b1y + b1h >= b2y && b1y <= b2y + b2h) {
+		cy = true
+	}
+	if (b2y  + b1h >= b1y && b2y <= b1y + b1h) {
+		cy = true
+	}
+	if (cx && cy) {
+		console.log("ahhhhhhh")
+		return true
+	}
+	
+}
 
 
 function manage_attack() {
@@ -1176,19 +1242,24 @@ function manage_attack() {
 		bone["x"] += bone["vx"];
 		bone["y"] += bone["vy"];
 		bone["a"] += bone["va"];
-
+		// bounding boxes
+		// canvas_rect([bone["x"] - x, bone["y"] - y, x * 2, y * 2], "cyan", 1);
+		// canvas_rect([s["x"], s["y"], s["w"], s["h"]], "cyan", 1);
 		// soul collision
-		// canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
-		// canvas_line(s["x"], s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
+		canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
+		canvas_line(s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
 		canvas_line(s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-		// canvas_line(s["x"] + s["w"], s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
-		// canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-
+		canvas_line(s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
+		canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
 		canvas_line(bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y, "red", 2)
-		// bone["x"] = canvas_width / 2
-		// equation of bone line
-		// let ans = collision_line([s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
-		// canvas_line(ans[0], ans[1], ans[0] + 5, ans[1] + 5, "cyan", 10)
+		// bounding box collision
+		// collision_box([bone["x"] - x, bone["y"] - y, x * 2, y * 2], [s["x"], s["y"], s["w"], s["h"]])
+		// collisions
+		let c1 = collision_line([s["x"], s["y"], s["x"] + s["w"], s["y"]], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
+		let c2 = collision_line([s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2)], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
+		let c3 = collision_line([s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
+		let c4 = collision_line([s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2)], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
+		let c5 = collision_line([s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 
 		// remove bone
 		if (bone["vx"] > 0) {
