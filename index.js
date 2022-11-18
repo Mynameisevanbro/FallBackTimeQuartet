@@ -86,6 +86,9 @@ var audio = {
 	"impact": [],
 	"impact_len": 700,
 	"impact_channel": [0, 0, 0, 0, 0],
+	"damage": [],
+	"damage_len": 100,
+	"damage_channel": [0, 0, 0, 0, 0],
 	"theme0": null,
 	"theme0_len": 30000,
 	"theme0_channel": [0],
@@ -439,16 +442,16 @@ function manage_command() {
 					obj = {
 						"x": box["x"],
 						"y": box["y"] + (box["h"] / 2),
-						"a": 0,
+						"a": 90,
 						"w": canvas_width / 90,
 						"h": box["h"],
 						"vx": 0.5,  // velocity x
 						"vy": 0,  // velocity y
-						"va": 1,  // velocity a
+						"va": 0,  // velocity a
 					}
 					s["sans1_bone"].push(obj)
 				} else if (command[0]["preset"] == "intro") {
-					for (let i = 0; i < 40; i ++) {
+					for (let i = 0; i < 10; i ++) {
 						// left
 						obj = {
 							"x": box["x"] + (box["w"] / 9),
@@ -1142,7 +1145,8 @@ function collision_line(line1, line2) {
 	let l1x2 = line1[2];
 	let l1y2 = line1[3];
 	// slove for m & b
-	let l1m = (l1y2 - l1y1) / (l1x2 - l1x1);
+	let run1 = (l1x2 - l1x1);
+	let l1m = (l1y2 - l1y1) / run1;
 	let l1b = l1y1 - (l1m * l1x1);
 	// define line 2
 	let l2x1 = line2[0];
@@ -1150,12 +1154,20 @@ function collision_line(line1, line2) {
 	let l2x2 = line2[2];
 	let l2y2 = line2[3];
 	// slove for m & b
-	let l2m = (l2y2 - l2y1) / (l2x2 - l2x1);
+	let run2 = (l2x2 - l2x1);
+	let l2m = (l2y2 - l2y1) / run2;
 	let l2b = l2y1 - (l2m * l2x1);
 	// solve for intersection
-	let x = (l1b - l2b) / (l2m - l1m);
-	let y = (l1m * x) + l1b;
+	let x;
+	let y;
 	// solve for collision
+	if (run2 == 0) {
+		x = l2x1;
+		y = (l1m * l2x1) + l1b;
+	} else {
+		x = (l1b - l2b) / (l2m - l1m);
+		y = (l1m * x) + l1b;
+	}
 	let l1d = Math.sqrt(Math.pow(l1x1 - l1x2, 2) + Math.pow(l1y1 - l1y2, 2));
 	let l1da = Math.sqrt(Math.pow(l1x1 - x, 2) + Math.pow(l1y1 - y, 2));
 	let l1db = Math.sqrt(Math.pow(l1x2 - x, 2) + Math.pow(l1y2 - y, 2));
@@ -1168,7 +1180,6 @@ function collision_line(line1, line2) {
 			canvas_rect([x - 4, y - 4, 8, 8], "black");
 			canvas_rect([x - 3, y - 3, 6, 6], "yellow");
 		}
-		
 		return 1
 	} else {
 		return 0
@@ -1260,7 +1271,12 @@ function manage_attack() {
 		let c3 = collision_line([s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 		let c4 = collision_line([s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2)], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 		let c5 = collision_line([s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
-
+		if (c1 + c2 + c3 + c4 + c5 > 0) {
+			if (s["hp"] > 0) {
+				s["hp"] -= 0.5;
+				manage_audio("damage")
+			}
+		}
 		// remove bone
 		if (bone["vx"] > 0) {
 			if (bone["x"] > canvas_width) {
@@ -1312,6 +1328,8 @@ function run() {
 		hp_w = canvas_width / 5
 		hp_x = (canvas_width / 2) - (hp_w / 2)
 		canvas_rect([hp_x, canvas_height * 0.8, hp_w, canvas_height / 18], "red")
+		hp2_w = (hp_w / 92) * s["hp"]
+		canvas_rect([hp_x, canvas_height * 0.8, hp2_w, canvas_height / 18], "yellow")
 		// draw options
 		canvas_img(texture["fight0"],
 			[texture["opt_xo"] + s["x_shake"], texture["opt_y"] + s["y_shake"],  texture["opt_w"], texture["opt_h"]])
@@ -1497,6 +1515,13 @@ function reset() {
 		impact.type = 'audio/mp3';
 		impact.loop = false;
 		audio["impact"].push(impact)
+	}
+	let damage;
+	for (i = 0; i < audio["impact_channel"].length; i ++) {
+		damage = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/damage.wav?raw=true")
+		damage.type = 'audio/mp3';
+		damage.loop = false;
+		audio["damage"].push(damage)
 	}
 	// load music
 	let theme0 = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/theme0.mp3?raw=true")
