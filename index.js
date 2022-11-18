@@ -1,7 +1,8 @@
 // varables
 var canvas_width;
 var canvas_height;
-var dev = true;
+// var dev = true;
+var dev = false;
 var s = {
 	// main + screen
 	"run": false,
@@ -87,8 +88,8 @@ var audio = {
 	"impact_len": 700,
 	"impact_channel": [0, 0, 0, 0, 0],
 	"damage": [],
-	"damage_len": 100,
-	"damage_channel": [0, 0, 0, 0, 0],
+	"damage_len": 500,
+	"damage_channel": [0],
 	"theme0": null,
 	"theme0_len": 30000,
 	"theme0_channel": [0],
@@ -130,7 +131,7 @@ function manage_fps(){
 }
 
 
-function manage_audio(file, volume=1) {
+function manage_audio(file, vol=1) {
 	let played = false
 	// audio is playing?
 	for (let i = 0; i < audio[`${file}_channel`].length; i ++) {
@@ -148,7 +149,7 @@ function manage_audio(file, volume=1) {
 		// is audio channel available?
 		if (audio[`${file}_channel`][i] == 0) {
 			// play audio
-			audio[file][i].volume = volume
+			audio[file][i].volume = vol
 			audio[file][i].play()
 			played = true
 			// set channel as busy
@@ -447,11 +448,11 @@ function manage_command() {
 						"h": box["h"],
 						"vx": 0.5,  // velocity x
 						"vy": 0,  // velocity y
-						"va": 0,  // velocity a
+						"va": 1,  // velocity a
 					}
 					s["sans1_bone"].push(obj)
 				} else if (command[0]["preset"] == "intro") {
-					for (let i = 0; i < 10; i ++) {
+					for (let i = 0; i < 40; i ++) {
 						// left
 						obj = {
 							"x": box["x"] + (box["w"] / 9),
@@ -1233,6 +1234,7 @@ function collision_box(rect1, rect2) {
 
 
 function manage_attack() {
+	let collision = false;
 	// sans 1 - bone
 	for (let i = 0; i < s["sans1_bone"].length; i ++) {
 		let bone = s["sans1_bone"][i]
@@ -1257,12 +1259,14 @@ function manage_attack() {
 		// canvas_rect([bone["x"] - x, bone["y"] - y, x * 2, y * 2], "cyan", 1);
 		// canvas_rect([s["x"], s["y"], s["w"], s["h"]], "cyan", 1);
 		// soul collision
-		canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
-		canvas_line(s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
-		canvas_line(s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-		canvas_line(s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
-		canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-		canvas_line(bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y, "red", 2)
+		if (dev) {
+			canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
+			canvas_line(s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
+			canvas_line(s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
+			canvas_line(s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
+			canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
+			canvas_line(bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y, "red", 2)
+		}
 		// bounding box collision
 		// collision_box([bone["x"] - x, bone["y"] - y, x * 2, y * 2], [s["x"], s["y"], s["w"], s["h"]])
 		// collisions
@@ -1272,10 +1276,7 @@ function manage_attack() {
 		let c4 = collision_line([s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2)], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 		let c5 = collision_line([s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"])], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 		if (c1 + c2 + c3 + c4 + c5 > 0) {
-			if (s["hp"] > 0) {
-				s["hp"] -= 0.5;
-				manage_audio("damage")
-			}
+			collision = true;
 		}
 		// remove bone
 		if (bone["vx"] > 0) {
@@ -1297,6 +1298,14 @@ function manage_attack() {
 			}
 		}
 		
+	}
+	if (collision) {
+		if (s["hp"] > 0) {
+			s["hp"] -= 1;
+			if (s["frame"] % 7 == 0) {
+				manage_audio("damage")
+			}
+		}
 	}
 }
 
@@ -1384,7 +1393,7 @@ function run() {
 		// reset gravity
 		if (s["gravity"] == "left") {
 			if (s["force"] > 19) {
-				manage_audio("impact")
+				manage_audio("impact", 0.5)
 				s["x_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 				s["y_shake"] += (Math.random() * s["force"]) - (Math.random() * s["force"])
 			}
@@ -1517,9 +1526,12 @@ function reset() {
 		audio["impact"].push(impact)
 	}
 	let damage;
-	for (i = 0; i < audio["impact_channel"].length; i ++) {
+	for (i = 0; i < 100; i ++) {
+		audio["damage_channel"].push(0)
+	}
+	for (i = 0; i < audio["damage_channel"].length; i ++) {
 		damage = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/damage.wav?raw=true")
-		damage.type = 'audio/mp3';
+		damage.type = 'audio/wav';
 		damage.loop = false;
 		audio["damage"].push(damage)
 	}
