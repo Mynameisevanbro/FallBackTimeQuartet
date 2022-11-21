@@ -1,8 +1,8 @@
 // varables
 var canvas_width;
 var canvas_height;
-// var dev = true;
 var dev = false;
+// var dev = false;
 var s = {
 	// main + screen
 	"run": false,
@@ -224,7 +224,8 @@ function canvas_line(x1, y1, x2, y2, color, width=1) {
 	ctx.moveTo(x1, y1);
 	ctx.lineWidth = width;
 	ctx.lineTo(x2, y2);
-	ctx.stroke();	
+	ctx.stroke();
+	ctx.lineWidth = 1;
 }
 
 
@@ -1154,80 +1155,126 @@ function collision_line(line1, line2) {
 	let l2y1 = line2[1];
 	let l2x2 = line2[2];
 	let l2y2 = line2[3];
-	// slove for m & b
-	let run2 = (l2x2 - l2x1);
-	let l2m = (l2y2 - l2y1) / run2;
-	let l2b = l2y1 - (l2m * l2x1);
-	// solve for intersection
-	let x;
-	let y;
-	// solve for collision
-	if (run2 == 0) {
-		x = l2x1;
-		y = (l1m * l2x1) + l1b;
-	} else {
-		x = (l1b - l2b) / (l2m - l1m);
-		y = (l1m * x) + l1b;
-	}
-	let l1d = Math.sqrt(Math.pow(l1x1 - l1x2, 2) + Math.pow(l1y1 - l1y2, 2));
-	let l1da = Math.sqrt(Math.pow(l1x1 - x, 2) + Math.pow(l1y1 - y, 2));
-	let l1db = Math.sqrt(Math.pow(l1x2 - x, 2) + Math.pow(l1y2 - y, 2));
-	let l2d = Math.sqrt(Math.pow(l2x1 - l2x2, 2) + Math.pow(l2y1 - l2y2, 2));
-	let l2da = Math.sqrt(Math.pow(l2x1 - x, 2) + Math.pow(l2y1 - y, 2));
-	let l2db = Math.sqrt(Math.pow(l2x2 - x, 2) + Math.pow(l2y2 - y, 2));
-	// return
-	if ((l1da + l1db) == l1d && (l2da + l2db) == l2d) {
+	// check box collision first for optimization
+	if (collision_box([l1x1, l1y1, l1x2 - l1x1, l1y2 - l1y1], [l2x1, l2y1, l2x2 - l2x1, l2y2 - l2y1])) {
+		// draw lines
 		if (dev) {
-			canvas_rect([x - 4, y - 4, 8, 8], "black");
-			canvas_rect([x - 3, y - 3, 6, 6], "yellow");
+			canvas_line(l1x1, l1y1, l1x2, l1y2, "yellow", 3)
+			canvas_line(l2x1, l2y1, l2x2, l2y2, "yellow", 3)
+			canvas_line(l1x1, l1y1, l1x2, l1y2, "blue", 1)
+			canvas_line(l2x1, l2y1, l2x2, l2y2, "blue", 1)
 		}
-		return 1
+		// slove for m & b
+		let run2 = (l2x2 - l2x1);
+		let l2m = (l2y2 - l2y1) / run2;
+		let l2b = l2y1 - (l2m * l2x1);
+		// solve for intersection
+		let x;
+		let y;
+		// solve for collision
+		if (run2 == 0) {
+			x = l2x1;
+			y = (l1m * l2x1) + l1b;
+		} else {
+			x = (l1b - l2b) / (l2m - l1m);
+			y = (l1m * x) + l1b;
+		}
+		let l1d = Math.sqrt(Math.pow(l1x1 - l1x2, 2) + Math.pow(l1y1 - l1y2, 2));
+		let l1da = Math.sqrt(Math.pow(l1x1 - x, 2) + Math.pow(l1y1 - y, 2));
+		let l1db = Math.sqrt(Math.pow(l1x2 - x, 2) + Math.pow(l1y2 - y, 2));
+		let l2d = Math.sqrt(Math.pow(l2x1 - l2x2, 2) + Math.pow(l2y1 - l2y2, 2));
+		let l2da = Math.sqrt(Math.pow(l2x1 - x, 2) + Math.pow(l2y1 - y, 2));
+		let l2db = Math.sqrt(Math.pow(l2x2 - x, 2) + Math.pow(l2y2 - y, 2));
+		// return
+		if ((l1da + l1db) == l1d && (l2da + l2db) == l2d) {
+			if (dev) {
+				canvas_rect([x - 4, y - 4, 8, 8], "black");
+				canvas_rect([x - 3, y - 3, 6, 6], "yellow");
+				canvas_line(l1x1, l1y1, l1x2, l1y2, "red", 1)
+				canvas_line(l2x1, l2y1, l2x2, l2y2, "red", 1)
+			}
+			return 1;
+		} else {
+			return 0;
+		}
 	} else {
-		return 0
+		return 0;
 	}
+	
 }
 
 
 function collision_box(rect1, rect2) {
-	let b1x = rect1[0]
-	let b1y = rect1[1]
-	let b1w = rect1[3]
-	let b1h = rect1[4]
-
-	let b2x = rect2[0]
-	let b2y = rect2[1]
-	let b2w = rect2[3]
-	let b2h = rect2[4]
-
-	let cx = false
+	// define rectangle 1
+	let b1x = rect1[0];
+	let b1y = rect1[1];
+	let b1w = rect1[2];
+	let b1h = rect1[3];
+	// fix coordinates
+	if (b1w < 0) {
+		b1x = b1x + b1w;
+		b1w = Math.abs(b1w);
+	}
+	if (b1h < 0) {
+		b1y = b1y + b1h;
+		b1h = Math.abs(b1h);
+	}
+	// define rectange 2
+	let b2x = rect2[0];
+	let b2y = rect2[1];
+	let b2w = rect2[2];
+	let b2h = rect2[3];
+	// fix coordinates
+	if (b2w < 0) {
+		b2x = b2x + b2w;
+		b2w = Math.abs(b2w);
+	}
+	if (b2h < 0) {
+		b2y = b2y + b2h;
+		b2h = Math.abs(b2h);
+	}
+	// draw rectangles
+	if (dev) {
+		canvas_rect([b1x, b1y, b1w ,b1h], "cyan", 1);
+		canvas_rect([b2x, b2y, b2w, b2h], "cyan", 1);
+	}
+	let cx = false;
+	let cy = false;
+	// check retangle 1
 	if (b1x >= b2x && b1x <= b2x + b2w) {
-		cx = true
+		cx = true;
 	}
-	if (b2x >= b1x && b2x <= b1x + b1w) {
-		cx = true
+	if (b1x + b1w >= b2x && b1x + b1w <= b2x + b2w) {
+		cx = true;
 	}
-	if (b1x + b1w >= b2x && b1x <= b2x + b2w) {
-		cx = true
-	}
-	if (b2x + b1w >= b1x && b2x <= b1x + b1w) {
-		cx = true
-	}
-	let cy = false
 	if (b1y >= b2y && b1y <= b2y + b2h) {
-		cy = true
+		cy = true;
+	}
+	if (b1y + b1h >= b2y && b1y + b1h <= b2y + b2h) {
+		cy = true;
+	}
+	// check rectangle 2
+	if (b2x >= b1x && b2x <= b1x + b1w) {
+		cx = true;
+	}
+	if (b2x + b2w >= b1x && b2x + b2w <= b1x + b1w) {
+		cx = true;
 	}
 	if (b2y >= b1y && b2y <= b1y + b1h) {
-		cy = true
+		cy = true;
 	}
-	if (b1y + b1h >= b2y && b1y <= b2y + b2h) {
-		cy = true
+	if (b2y + b2h >= b1y && b2y + b2h <= b1y + b1h) {
+		cy = true;
 	}
-	if (b2y  + b1h >= b1y && b2y <= b1y + b1h) {
-		cy = true
-	}
+	// return
 	if (cx && cy) {
-		console.log("ahhhhhhh")
-		return true
+		if (dev) {
+			canvas_rect([b1x, b1y, b1w ,b1h], "red", 1);
+			canvas_rect([b2x, b2y, b2w, b2h], "red", 1);
+		}
+		return true;
+	} else {
+		return false;
 	}
 	
 }
@@ -1255,20 +1302,6 @@ function manage_attack() {
 		bone["x"] += bone["vx"];
 		bone["y"] += bone["vy"];
 		bone["a"] += bone["va"];
-		// bounding boxes
-		// canvas_rect([bone["x"] - x, bone["y"] - y, x * 2, y * 2], "cyan", 1);
-		// canvas_rect([s["x"], s["y"], s["w"], s["h"]], "cyan", 1);
-		// soul collision
-		if (dev) {
-			canvas_line(s["x"], s["y"], s["x"] + s["w"], s["y"], "cyan", 2)
-			canvas_line(s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2), "cyan", 2)
-			canvas_line(s["x"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-			canvas_line(s["x"] + s["w"] + (s["w"] / 1000), s["y"], s["x"] + s["w"], s["y"] + (s["h"] / 2), "cyan", 2)
-			canvas_line(s["x"] + s["w"], s["y"] + (s["h"] / 2), s["x"] + (s["w"] / 2), s["y"] + (s["h"]), "cyan", 2)
-			canvas_line(bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y, "red", 2)
-		}
-		// bounding box collision
-		// collision_box([bone["x"] - x, bone["y"] - y, x * 2, y * 2], [s["x"], s["y"], s["w"], s["h"]])
 		// collisions
 		let c1 = collision_line([s["x"], s["y"], s["x"] + s["w"], s["y"]], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
 		let c2 = collision_line([s["x"] - (s["w"] / 1000), s["y"], s["x"], s["y"] + (s["h"] / 2)], [bone["x"] - x, bone["y"] - y, bone["x"] + x, bone["y"] + y])
@@ -1326,9 +1359,11 @@ function run() {
 	canvas_rect([canvas_width - ((canvas_width - box["w"]) / 2), box["y"], (canvas_width - box["w"]) / 2, box["h"]], "black");
 	canvas_rect([0, box["y"] + box["h"], canvas_width, canvas_height - (box["y"] + box["h"])], "black");
 	// information
-	canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
-	canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
-	canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "black");
+	if (dev) {
+		canvas_text(`FPS: ${s["fps"]}`, [5, 20], 20, "lime", "Courier", "left");
+		canvas_text(`avg: ${s["fps_avg"]}`, [5, 40], 20, "lime", "Courier", "left");
+		canvas_text(`FTO: ${Math.round(s["timeout"])}`, [5, 60], 20, "lime", "Courier", "black");
+	}
 	// draw sans
 	manage_sans();
 	// draw options
