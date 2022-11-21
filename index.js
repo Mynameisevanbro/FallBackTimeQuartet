@@ -1530,8 +1530,8 @@ function reset() {
 		audio["damage_channel"].push(0)
 	}
 	for (i = 0; i < audio["damage_channel"].length; i ++) {
-		damage = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/damage.wav?raw=true")
-		damage.type = 'audio/wav';
+		damage = new Audio("https://github.com/Mynameisevanbro/FallBackTimeQuartet.io/blob/main/audio/damage.mp3?raw=true")
+		damage.type = 'audio/mp3';
 		damage.loop = false;
 		audio["damage"].push(damage)
 	}
